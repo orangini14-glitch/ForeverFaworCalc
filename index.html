@@ -335,24 +335,24 @@
         return lang === 'ru' ? `https://www.wowhead.com/forever/ru/item=${itemId}` : `https://www.wowhead.com/forever/item=${itemId}`;
     }
 
-    function formatWoWMoney(copperValue) {
-        if (copperValue === null || copperValue === undefined || isNaN(copperValue)) return '—';
-        const copper = Math.round(copperValue);
-        const gold = Math.floor(copper / 10000);
-        const silver = Math.floor((copper % 10000) / 100);
-        const remainingCopper = copper % 100;
+  function formatWoWMoney(copperValue) {
+    if (copperValue === null || copperValue === undefined || isNaN(copperValue)) return '—';
+    const copper = Math.round(copperValue);
+    const gold = Math.floor(copper / 10000);
+    const silver = Math.floor((copper % 10000) / 100);
+    const remainingCopper = copper % 100;
 
-        // ИСПОЛЬЗУЕМ ИКОНКИ ИЗ ИНТЕРФЕЙСА ИГРЫ (UI)
-        const goldIcon = '<img src="https://wow.zamimg.com/images/wow/icons/small/ui-goldicon.jpg" class="coin-icon" alt="g">';
-        const silverIcon = '<img src="https://wow.zamimg.com/images/wow/icons/small/ui-silvericon.jpg" class="coin-icon" alt="s">';
-        const copperIcon = '<img src="https://wow.zamimg.com/images/wow/icons/small/ui-coppericon.jpg" class="coin-icon" alt="c">';
+    // Используем проверенные иконки монет с Wowhead (INV_Misc_Coin_xx)
+    const goldIcon = '<img src="https://wow.zamimg.com/images/wow/icons/medium/inv_misc_coin_01.jpg" class="coin-icon" alt="g">';
+    const silverIcon = '<img src="https://wow.zamimg.com/images/wow/icons/medium/inv_misc_coin_03.jpg" class="coin-icon" alt="s">';
+    const copperIcon = '<img src="https://wow.zamimg.com/images/wow/icons/medium/inv_misc_coin_05.jpg" class="coin-icon" alt="c">';
 
-        let result = '';
-        if (gold > 0) result += `${gold} ${goldIcon} `;
-        if (silver > 0 || (gold > 0 && remainingCopper > 0)) result += `${silver} ${silverIcon} `;
-        if (remainingCopper > 0 || (gold === 0 && silver === 0)) result += `${remainingCopper} ${copperIcon}`;
-        return result.trim();
-    }
+    let result = '';
+    if (gold > 0) result += `${gold} ${goldIcon} `;
+    if (silver > 0 || (gold > 0 && remainingCopper > 0)) result += `${silver} ${silverIcon} `;
+    if (remainingCopper > 0 || (gold === 0 && silver === 0)) result += `${remainingCopper} ${copperIcon}`;
+    return result.trim();
+}
 
     // Читаем данные из глобальной переменной, которую создал GitHub Action
     function getPrice(itemId) {
