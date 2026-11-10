@@ -1,0 +1,36 @@
+name: Update Auction Prices
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Запуск каждый час
+  workflow_dispatch: # Позволяет запустить вручную
+
+jobs:
+  update-prices:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Важно: дает право сохранять изменения в репозиторий
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Run price updater
+        run: python update-prices.py
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add auction-data.js
+          if ! git diff --staged --quiet; then
+            git commit -m "Auto-update auction prices"
+            git push
+          else
+            echo "Нет изменений для коммита."
+          fi
