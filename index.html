@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WoW Forever: Калькулятор выгоды Merchant's Favor</title>
+    <style>
+        :root {
+            --bg: #1e1e2e; --surface: #2a2a3c; --text: #cdd6f4; --accent: #89b4fa;
+            --gold: #f9e2af; --green: #a6e3a1; --red: #f38ba8; --border: #45475a;
+            --hover: #313244;
+            --bg-profit-high: rgba(166, 227, 161, 0.15);
+            --border-profit-high: #a6e3a1;
+            --bg-profit-mid: rgba(249, 226, 175, 0.1);
+            --border-profit-mid: #f9e2af;
+            --bg-profit-low: rgba(243, 139, 168, 0.15);
+            --border-profit-low: #f38ba8;
+            --rarity-uncommon: #1eff00;
+            --rarity-common: #9d9d9d;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: background 0.3s; }
+        h1 { color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; text-align: center; }
+        .container { max-width: 1300px; margin: 0 auto; }
+        
+        .controls { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; align-items: center; background: var(--surface); padding: 15px; border-radius: 8px; justify-content: center; }
+        .controls label { font-weight: bold; }
+        .controls select, .controls input { padding: 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+        .controls input[type="number"] { width: 80px; }
+        .controls input[type="checkbox"] { width: auto; cursor: pointer; }
+        .btn { padding: 10px 20px; background: var(--accent); color: var(--bg); border: none; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn:hover { background: #b4befe; }
+        .lang-switch { display: flex; gap: 5px; background: var(--bg); padding: 4px; border-radius: 4px; border: 1px solid var(--border); }
+        .lang-btn { background: transparent; color: var(--text); border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-weight: bold; }
+        .lang-btn.active { background: var(--accent); color: var(--bg); }
+        
+        table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        th, td { padding: 0; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        th { padding: 12px 15px; background-color: #313244; cursor: pointer; position: sticky; top: 0; z-index: 10; user-select: none; text-align: center; }
+        th:hover { background-color: var(--accent); color: var(--bg); }
+        
+        .crate-cell { border-right: 2px solid var(--border); background-color: #252535; width: 25%; vertical-align: middle; }
+        .crate-content { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; height: 100%; padding: 15px; }
+        .crate-name { font-weight: bold; color: var(--accent); margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.1em; flex-wrap: wrap; }
+        .crate-meta { font-size: 0.9em; color: #a6adc8; display: flex; flex-direction: column; gap: 4px; align-items: center; }
+        
+        .resources-container { width: 75%; padding: 0; }
+        .resource-row { display: flex; align-items: center; padding: 10px 15px; border-bottom: 1px solid var(--border); transition: background-color 0.2s; }
+        .resource-row:last-child { border-bottom: none; }
+        
+        .icon-link { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text); transition: color 0.2s; flex: 1; }
+        .icon-link:hover { color: var(--accent); }
+        .icon-wrapper { border-radius: 4px; padding: 2px; display: inline-flex; }
+        .icon-wrapper.common { border: 1px solid var(--rarity-common); }
+        .icon-wrapper.uncommon { border: 1px solid var(--rarity-uncommon); box-shadow: inset 0 0 4px var(--rarity-uncommon); }
+        .item-icon { width: 28px; height: 28px; border-radius: 2px; background-color: #000; object-fit: cover; display: block; }
+        
+        .row-high { background-color: var(--bg-profit-high); border-left: 4px solid var(--border-profit-high); }
+        .row-mid { background-color: var(--bg-profit-mid); border-left: 4px solid var(--border-profit-mid); }
+        .row-low { background-color: var(--bg-profit-low); border-left: 4px solid var(--border-profit-low); }
+        
+        .profit-text-high { color: var(--green); font-weight: bold; }
+        .profit-text-mid { color: var(--gold); font-weight: bold; }
+        .profit-text-low { color: var(--red); font-weight: bold; }
+        .text-muted { color: #a6adc8; font-style: italic; }
+        
+        .price-info { display: flex; gap: 20px; align-items: center; min-width: 220px; justify-content: flex-end; }
+        
+        .notes { font-size: 0.9em; color: #a6adc8; margin-top: 20px; padding: 15px; background: var(--surface); border-radius: 8px; border-left: 4px solid var(--accent); }
+        .status-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.8em; font-weight: bold; }
+        .status-ok { background: var(--green); color: var(--bg); }
+        .status-error { background: var(--red); color: var(--bg); }
+
+        .th-resources-inner { display: flex; align-items: center; width: 100%; padding-left: 15px; padding-right: 15px; box-sizing: border-box; }
+        .th-res-name { flex: 1; text-align: left; }
+        .th-price-info { display: flex; gap: 20px; min-width: 220px; justify-content: flex-end; }
+        .th-price-item { width: 100px; text-align: right; }
+        .th-price-favor { width: 120px; text-align: right; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px;">
+        <h1 id="title-text" style="border: none; margin: 0; padding: 0;">📦 Калькулятор выгоды Merchant's Favor</h1>
+        <div class="lang-switch">
+            <button class="lang-btn active" onclick="setLang('ru')">RU</button>
+            <button class="lang-btn" onclick="setLang('en')">ENG</button>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <div>
+            <label for="maxLevel" id="lbl-maxLevel">Макс. уровень:</label>
+            <input type="number" id="maxLevel" value="60" min="1" max="60">
+        </div>
+        <div>
+            <label for="sortBy" id="lbl-sortBy">Сортировать:</label>
+            <select id="sortBy">
+                <option value="level" id="opt-level">По уровню</option>
+                <option value="costAsc" id="opt-costAsc">По выгоде (дешевле)</option>
+                <option value="costDesc" id="opt-costDesc">По выгоде (дороже)</option>
+                <option value="name" id="opt-name">По названию</option>
+            </select>
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <input type="checkbox" id="onlyBest">
+            <label for="onlyBest" id="lbl-onlyBest" style="cursor: pointer;">Выгодное</label>
+        </div>
+        <span id="status" class="status-badge status-ok">Данные загружены</span>
+    </div>
+
+    <table id="resultsTable">
+        <thead>
+            <tr>
+                <th onclick="changeSort('level')" id="th-crate">Ящик / Уровень</th>
+                <th id="th-resources" style="cursor: default;">
+                    <div class="th-resources-inner">
+                        <span class="th-res-name" id="th-res-name">Варианты ресурсов</span>
+                        <div class="th-price-info">
+                            <span class="th-price-item" id="th-cost-item">Цена / шт.</span>
+                            <span class="th-price-favor" id="th-cost-favor">Цена 1 Favor</span>
+                        </div>
+                    </div>
+                </th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+</div>
+
+<!-- ПОДКЛЮЧАЕМ ФАЙЛ С ДАННЫМИ, КОТОРЫЙ СГЕНЕРИРУЕТ GITHUB -->
+<script src="auction-data.js"></script>
+
+<script>
+    const translations = {
+        ru: {
+            title: "📦 Калькулятор выгоды Merchant's Favor",
+            lblMaxLevel: "Макс. уровень:", lblSortBy: "Сортировать:",
+            optLevel: "По уровню", optCostAsc: "По выгоде (дешевле)", optCostDesc: "По выгоде (дороже)", optName: "По названию",
+            lblOnlyBest: "Выгодное",
+            thCrate: "Ящик / Уровень", 
+            thResName: "Варианты ресурсов",
+            thCostItem: "Цена / шт.",
+            thCostFavor: "Цена 1 Favor",
+            crateLevel: "Мин. уровень:", crateFavor: "Награда:", cratePrice: "Цена на аукционе:",
+            noPrice: "—", noData: "Нет данных. Возможно, GitHub Action еще не сгенерировал файл."
+        },
+        en: {
+            title: "📦 Merchant's Favor Profit Calculator",
+            lblMaxLevel: "Max Level:", lblSortBy: "Sort by:",
+            optLevel: "By Level", optCostAsc: "By Profit (Cheapest)", optCostDesc: "By Profit (Most Expensive)", optName: "By Name",
+            lblOnlyBest: "Best only",
+            thCrate: "Crate / Level", 
+            thResName: "Resource Options",
+            thCostItem: "Cost / item",
+            thCostFavor: "Cost 1 Favor",
+            crateLevel: "Min Level:", crateFavor: "Reward:", cratePrice: "Auction Price:",
+            noPrice: "—", noData: "No data. GitHub Action might not have generated the file yet."
+        }
+    };
+
+    let currentLang = 'ru';
+
+    function setLang(lang) {
+        currentLang = lang;
+        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`.lang-btn[onclick="setLang('${lang}')"]`).classList.add('active');
+        
+        const t = translations[lang];
+        document.getElementById('title-text').innerText = t.title;
+        document.getElementById('lbl-maxLevel').innerText = t.lblMaxLevel;
+        document.getElementById('lbl-sortBy').innerText = t.lblSortBy;
+        document.getElementById('opt-level').innerText = t.optLevel;
+        document.getElementById('opt-costAsc').innerText = t.optCostAsc;
+        document.getElementById('opt-costDesc').innerText = t.optCostDesc;
+        document.getElementById('opt-name').innerText = t.optName;
+        document.getElementById('lbl-onlyBest').innerText = t.lblOnlyBest;
+        document.getElementById('th-crate').innerText = t.thCrate;
+        document.getElementById('th-res-name').innerText = t.thResName;
+        document.getElementById('th-cost-item').innerText = t.thCostItem;
+        document.getElementById('th-cost-favor').innerText = t.thCostFavor;
+        
+        if (currentData.length > 0) renderTable();
+    }
+
+    const itemDB = {
+        "Peacebloom": { id: 2447, name_ru: "Мироцвет", icon: "inv_misc_flower_02" },
+        "Silverleaf": { id: 765, name_ru: "Сребролист", icon: "inv_misc_herb_10" },
+        "Earthroot": { id: 2449, name_ru: "Землекорень", icon: "inv_misc_herb_07" },
+        "Mageroyal": { id: 785, name_ru: "Магороза", icon: "inv_jewelry_talisman_03" },
+        "Briarthorn": { id: 2450, name_ru: "Остротёрн", icon: "inv_misc_root_01" },
+        "Stranglekelp": { id: 3820, name_ru: "Удавник", icon: "inv_misc_herb_11" },
+        "Bruiseweed": { id: 2453, name_ru: "Синячник", icon: "inv_misc_herb_01" },
+        "Wild Steelbloom": { id: 3355, name_ru: "Дикий сталецвет", icon: "inv_misc_flower_01" },
+        "Grave Moss": { id: 3369, name_ru: "Могильный мох", icon: "inv_misc_dust_02" },
+        "Kingsblood": { id: 3356, name_ru: "Королевская кровь", icon: "inv_misc_herb_03" },
+        "Liferoot": { id: 3357, name_ru: "Корень жизни", icon: "inv_misc_root_02" },
+        "Fadeleaf": { id: 3818, name_ru: "Блекнолист", icon: "inv_misc_herb_12" },
+        "Goldthorn": { id: 3821, name_ru: "Златошип", icon: "inv_misc_herb_15" },
+        "Khadgar's Whisker": { id: 3358, name_ru: "Ус Кадгара", icon: "inv_misc_herb_08" },
+        "Wintersbite": { id: 3819, name_ru: "Зимний поцелуй", icon: "inv_misc_flower_03" },
+        "Firebloom": { id: 4625, name_ru: "Огнецвет", icon: "inv_misc_herb_19" },
+        "Purple Lotus": { id: 8831, name_ru: "Лиловый лотос", icon: "inv_misc_herb_17" },
+        "Arthas' Tears": { id: 8836, name_ru: "Слезы Артаса", icon: "inv_misc_herb_13" },
+        "Golden Sansam": { id: 13464, name_ru: "Золотой сансам", icon: "inv_misc_herb_sansamroot" },
+        "Sungrass": { id: 8838, name_ru: "Солнечник", icon: "inv_misc_herb_18" },
+        "Blindweed": { id: 8839, name_ru: "Слепоцвет", icon: "inv_misc_herb_14" },
+        "Ghost Mushroom": { id: 8845, name_ru: "Призрачный гриб", icon: "inv_mushroom_08" },
+        "Gromsblood": { id: 8846, name_ru: "Кровь грома", icon: "inv_misc_herb_16" },
+        "Dreamfoil": { id: 13463, name_ru: "Снолист", icon: "inv_misc_herb_dreamfoil" },
+        "Mountain Silversage": { id: 13465, name_ru: "Горный серебрист", icon: "inv_misc_herb_mountainsilversage" },
+        "Plaguebloom": { id: 13466, name_ru: "Чумоцвет", icon: "inv_misc_herb_plaguebloom" },
+        "Icecap": { id: 13467, name_ru: "Ледяной покров", icon: "inv_misc_herb_icecap" },
+        "Copper Ore": { id: 2770, name_ru: "Медная руда", icon: "inv_ore_copper_01" },
+        "Tin Ore": { id: 2771, name_ru: "Оловянная руда", icon: "inv_ore_tin_01" },
+        "Silver Ore": { id: 2775, name_ru: "Серебряная руда", icon: "inv_stone_16" },
+        "Iron Ore": { id: 2772, name_ru: "Железная руда", icon: "inv_ore_iron_01" },
+        "Gold Ore": { id: 2776, name_ru: "Золотая руда", icon: "inv_ore_gold_01" },
+        "Mithril Ore": { id: 3858, name_ru: "Мифриловая руда", icon: "inv_ore_mithril_02" },
+        "Truesilver Ore": { id: 7911, name_ru: "Руда истинного серебра", icon: "inv_ore_truesilver_01" },
+        "Thorium Ore": { id: 10620, name_ru: "Ториевая руда", icon: "inv_ore_thorium_02" },
+        "Dark Iron Ore": { id: 11370, name_ru: "Руда темного железа", icon: "inv_ingot_mithril" },
+        "Copper Bar": { id: 2840, name_ru: "Медный слиток", icon: "inv_ingot_02" },
+        "Tin Bar": { id: 3576, name_ru: "Оловянный слиток", icon: "inv_ingot_05" },
+        "Bronze Bar": { id: 2841, name_ru: "Бронзовый слиток", icon: "inv_ingot_bronze" },
+        "Silver Bar": { id: 2842, name_ru: "Серебряный слиток", icon: "inv_ingot_01" },
+        "Iron Bar": { id: 3575, name_ru: "Железный слиток", icon: "inv_ingot_iron" },
+        "Mithril Bar": { id: 3860, name_ru: "Мифриловый слиток", icon: "inv_ingot_06" },
+        "Steel Bar": { id: 3859, name_ru: "Стальной слиток", icon: "inv_ingot_steel" },
+        "Gold Bar": { id: 3577, name_ru: "Золотой слиток", icon: "inv_ingot_03" },
+        "Truesilver Bar": { id: 6037, name_ru: "Слиток истинного серебра", icon: "inv_ingot_08" },
+        "Thorium Bar": { id: 12359, name_ru: "Ториевый слиток", icon: "inv_ingot_07" },
+        "Dark Iron Bar": { id: 11371, name_ru: "Слиток темного железа", icon: "inv_ingot_mithril" },
+        "Linen Cloth": { id: 2589, name_ru: "Льняная ткань", icon: "inv_fabric_linen_01" },
+        "Wool Cloth": { id: 2592, name_ru: "Шерстяная ткань", icon: "inv_fabric_wool_01" },
+        "Silk Cloth": { id: 4306, name_ru: "Шелковая ткань", icon: "inv_fabric_silk_01" },
+        "Mageweave Cloth": { id: 4338, name_ru: "Ткань из магической ткани", icon: "inv_fabric_mageweave_01" },
+        "Runecloth": { id: 14047, name_ru: "Руническая ткань", icon: "inv_fabric_purplefire_01" },
+        "Light Leather": { id: 2318, name_ru: "Тонкая кожа", icon: "inv_misc_leatherscrap_03" },
+        "Medium Leather": { id: 2319, name_ru: "Средняя кожа", icon: "inv_misc_leatherscrap_05" },
+        "Heavy Leather": { id: 4234, name_ru: "Толстая кожа", icon: "inv_misc_leatherscrap_07" },
+        "Thick Leather": { id: 4304, name_ru: "Плотная кожа", icon: "inv_misc_leatherscrap_08" },
+        "Rugged Leather": { id: 8170, name_ru: "Грубая кожа", icon: "inv_misc_leatherscrap_02" },
+        "Cured Light Hide": { id: 4231, name_ru: "Дубленая тонкая шкура", icon: "inv_misc_pelt_wolf_01" },
+        "Cured Medium Hide": { id: 4233, name_ru: "Дубленая средняя шкура", icon: "inv_misc_pelt_bear_02" },
+        "Cured Heavy Hide": { id: 4236, name_ru: "Дубленая толстая шкура", icon: "inv_misc_pelt_wolf_02" },
+        "Cured Thick Hide": { id: 8172, name_ru: "Дубленая плотная шкура", icon: "inv_misc_pelt_bear_01" },
+        "Strange Dust": { id: 10940, name_ru: "Странная пыль", icon: "inv_enchant_duststrange" },
+        "Soul Dust": { id: 11083, name_ru: "Пыль души", icon: "inv_enchant_dustsoul" },
+        "Vision Dust": { id: 11137, name_ru: "Пыль видений", icon: "inv_enchant_dustvision" },
+        "Dream Dust": { id: 11176, name_ru: "Пыль грез", icon: "inv_enchant_dustdream" },
+        "Lesser Magic Essence": { id: 10938, name_ru: "Малая волшебная эссенция", icon: "inv_enchant_essencemagicsmall" },
+        "Greater Magic Essence": { id: 10939, name_ru: "Большая волшебная эссенция", icon: "inv_enchant_essencemagiclarge" },
+        "Greater Astral Essence": { id: 11082, name_ru: "Большая астральная эссенция", icon: "inv_enchant_essenceastrallarge" },
+        "Greater Mystic Essence": { id: 11135, name_ru: "Большая мистическая эссенция", icon: "inv_enchant_essencemysticallarge" },
+        "Greater Nether Essence": { id: 11175, name_ru: "Большая эссенция Пустоты", icon: "inv_enchant_essencenetherlarge" },
+        "Small Glimmering Shard": { id: 10978, name_ru: "Малый мерцающий осколок", icon: "inv_enchant_shardglimmeringsmall" },
+        "Large Glimmering Shard": { id: 11084, name_ru: "Большой мерцающий осколок", icon: "inv_enchant_shardglimmeringlarge" },
+        "Small Glowing Shard": { id: 11138, name_ru: "Малый светящийся осколок", icon: "inv_enchant_shardglowingsmall" },
+        "Large Glowing Shard": { id: 11139, name_ru: "Большой светящийся осколок", icon: "inv_enchant_shardglowinglarge" },
+        "Small Radiant Shard": { id: 11177, name_ru: "Малый сияющий осколок", icon: "inv_enchant_shardradientsmall" },
+        "Large Radiant Shard": { id: 11178, name_ru: "Большой сияющий осколок", icon: "inv_enchant_shardradientlarge" },
+        "Small Brilliant Shard": { id: 14343, name_ru: "Малый сверкающий осколок", icon: "inv_enchant_shardbrilliantsmall" },
+        "Large Brilliant Shard": { id: 14344, name_ru: "Большой сверкающий осколок", icon: "inv_enchant_shardbrilliantlarge" },
+        "Bronze Tube": { id: 4371, name_ru: "Бронзовая трубка", icon: "inv_gizmo_pipe_01" },
+        "Whirring Bronze Gizmo": { id: 4375, name_ru: "Трещащий бронзовый механизм", icon: "inv_gizmo_02" },
+        "Bronze Framework": { id: 4382, name_ru: "Бронзовый каркас", icon: "inv_gizmo_bronzeframework_01" },
+        "Gold Power Core": { id: 10558, name_ru: "Золотое силовое ядро", icon: "inv_battery_02" },
+        "Iron Strut": { id: 4387, name_ru: "Железная стойка", icon: "inv_spear_05" },
+        "Mithril Tube": { id: 10559, name_ru: "Мифриловая труба", icon: "inv_musket_01" },
+        "Unstable Trigger": { id: 10560, name_ru: "Нестабильный триггер", icon: "inv_battery_01" },
+        "Mithril Casing": { id: 10561, name_ru: "Мифриловый корпус", icon: "inv_gizmo_mithrilcasing_01" },
+        "Thorium Widget": { id: 15994, name_ru: "Ториевый прибор", icon: "inv_gizmo_04" },
+        "Truesilver Transformer": { id: 18631, name_ru: "Трансформатор истинного серебра", icon: "inv_staff_18" },
+        "Thorium Tube": { id: 19795, name_ru: "Ториевая труба", icon: "inv_gizmo_pipe_04" },
+        "Handful of Copper Bolts": { id: 4359, name_ru: "Горсть медных болтов", icon: "inv_misc_gear_06" },
+        "Copper Tube": { id: 4361, name_ru: "Медная труба", icon: "inv_gizmo_pipe_02" },
+        "Copper Modulator": { id: 4363, name_ru: "Медный модулятор", icon: "inv_gizmo_03" },
+        "Bolt of Linen Cloth": { id: 2996, name_ru: "Рулон льняной ткани", icon: "inv_fabric_linen_02" },
+        "Bolt of Woolen Cloth": { id: 2997, name_ru: "Рулон шерстяной ткани", icon: "inv_fabric_wool_03" },
+        "Bolt of Silk Cloth": { id: 4305, name_ru: "Рулон шелковой ткани", icon: "inv_fabric_silk_03" },
+        "Bolt of Mageweave": { id: 4339, name_ru: "Рулон магической ткани", icon: "inv_fabric_mageweave_03" },
+        "Bolt of Runecloth": { id: 14048, name_ru: "Рулон рунической ткани", icon: "inv_fabric_purplefire_02" }
+    };
+
+    const cratesData = [
+        { id: 248682, name: "Apprentice Herbs", name_ru: "Ящик ученика (Травы)", icon: "inv_crate_07", level: 10, favor: 5, rarity: "common", options: [ {name:"Peacebloom", qty:20}, {name:"Silverleaf", qty:20}, {name:"Earthroot", qty:10}, {name:"Mageroyal", qty:10}, {name:"Briarthorn", qty:10} ] },
+        { id: 248683, name: "Apprentice Ore", name_ru: "Ящик ученика (Руда)", icon: "inv_crate_07", level: 10, favor: 5, rarity: "common", options: [ {name:"Copper Ore", qty:20}, {name:"Tin Ore", qty:20} ] },
+        { id: 248684, name: "Apprentice Textiles", name_ru: "Ящик ученика (Ткань)", icon: "inv_crate_07", level: 10, favor: 5, rarity: "common", options: [ {name:"Linen Cloth", qty:40}, {name:"Light Leather", qty:20} ] },
+        { id: 248685, name: "Apprentice Curiosities", name_ru: "Ящик ученика (Диковинки)", icon: "inv_crate_07", level: 10, favor: 5, rarity: "common", options: [ {name:"Strange Dust", qty:20}, {name:"Greater Magic Essence", qty:4}, {name:"Small Glimmering Shard", qty:6}, {name:"Large Glimmering Shard", qty:2} ] },
+        { id: 248703, name: "Apprentice Ingots", name_ru: "Ящик ученика (Слитки)", icon: "inv_crate_07", level: 10, favor: 5, rarity: "uncommon", options: [ {name:"Copper Bar", qty:20}, {name:"Tin Bar", qty:20}, {name:"Bronze Bar", qty:10} ] },
+        { id: 248704, name: "Apprentice Parts", name_ru: "Ящик ученика (Детали)", icon: "inv_crate_07", level: 10, favor: 5, rarity: "uncommon", options: [ {name:"Handful of Copper Bolts", qty:16}, {name:"Copper Tube", qty:16}, {name:"Copper Modulator", qty:4} ] },
+        { id: 248702, name: "Apprentice Fabrics", name_ru: "Ящик ученика (Кожа/Ткань)", icon: "inv_crate_07", level: 10, favor: 5, rarity: "uncommon", options: [ {name:"Cured Light Hide", qty:2}, {name:"Bolt of Linen Cloth", qty:20} ] },
+        
+        { id: 248686, name: "Journeyman Herbs", name_ru: "Ящик подмастерья (Травы)", icon: "inv_crate_07", level: 10, favor: 5, rarity: "common", options: [ {name:"Stranglekelp", qty:10}, {name:"Bruiseweed", qty:10}, {name:"Wild Steelbloom", qty:10}, {name:"Grave Moss", qty:10}, {name:"Kingsblood", qty:10} ] },
+        { id: 248687, name: "Journeyman Ore", name_ru: "Ящик подмастерья (Руда)", icon: "inv_crate_07", level: 10, favor: 5, rarity: "common", options: [ {name:"Silver Ore", qty:10}, {name:"Iron Ore", qty:20} ] },
+        { id: 248688, name: "Journeyman Textiles", name_ru: "Ящик подмастерья (Ткань)", icon: "inv_crate_07", level: 10, favor: 5, rarity: "common", options: [ {name:"Wool Cloth", qty:20}, {name:"Silk Cloth", qty:40}, {name:"Medium Leather", qty:20} ] },
+        { id: 248689, name: "Journeyman Curiosities", name_ru: "Ящик подмастерья (Диковинки)", icon: "inv_crate_07", level: 10, favor: 5, rarity: "common", options: [ {name:"Soul Dust", qty:20}, {name:"Greater Astral Essence", qty:4}, {name:"Small Glowing Shard", qty:6}, {name:"Large Glowing Shard", qty:2} ] },
+        { id: 248706, name: "Journeyman Ingots", name_ru: "Ящик подмастерья (Слитки)", icon: "inv_crate_07", level: 10, favor: 5, rarity: "uncommon", options: [ {name:"Silver Bar", qty:10}, {name:"Iron Bar", qty:20} ] },
+        { id: 248705, name: "Journeyman Fabrics", name_ru: "Ящик подмастерья (Кожа/Ткань)", icon: "inv_crate_07", level: 10, favor: 5, rarity: "uncommon", options: [ {name:"Bolt of Woolen Cloth", qty:6}, {name:"Bolt of Silk Cloth", qty:10}, {name:"Cured Medium Hide", qty:2} ] },
+        { id: 248707, name: "Journeyman Parts", name_ru: "Ящик подмастерья (Детали)", icon: "inv_crate_07", level: 10, favor: 5, rarity: "uncommon", options: [ {name:"Bronze Tube", qty:8}, {name:"Whirring Bronze Gizmo", qty:7}, {name:"Bronze Framework", qty:4}, {name:"Gold Power Core", qty:45} ] },
+        
+        { id: 248690, name: "Earthly Expert Herbs", name_ru: "Ящик умельца (Корни и стебли)", icon: "inv_crate_07", level: 20, favor: 10, rarity: "common", options: [ {name:"Liferoot", qty:20}, {name:"Fadeleaf", qty:10}, {name:"Goldthorn", qty:10}, {name:"Khadgar's Whisker", qty:10} ] },
+        { id: 248691, name: "Flowering Expert Herbs", name_ru: "Ящик умельца (Цветущие Травы)", icon: "inv_crate_07", level: 20, favor: 10, rarity: "common", options: [ {name:"Wintersbite", qty:10}, {name:"Firebloom", qty:10}, {name:"Purple Lotus", qty:20}, {name:"Arthas' Tears", qty:10} ] },
+        { id: 248692, name: "Expert Ore", name_ru: "Ящик умельца (Руда)", icon: "inv_crate_07", level: 20, favor: 10, rarity: "common", options: [ {name:"Gold Ore", qty:10}, {name:"Mithril Ore", qty:20} ] },
+        { id: 248693, name: "Expert Textiles", name_ru: "Ящик умельца (Ткань)", icon: "inv_crate_07", level: 20, favor: 10, rarity: "common", options: [ {name:"Mageweave Cloth", qty:40}, {name:"Heavy Leather", qty:20} ] },
+        { id: 248694, name: "Expert Curiosities", name_ru: "Ящик умельца (Диковинки)", icon: "inv_crate_07", level: 20, favor: 10, rarity: "common", options: [ {name:"Vision Dust", qty:20}, {name:"Greater Mystic Essence", qty:4}, {name:"Small Radiant Shard", qty:6}, {name:"Large Radiant Shard", qty:2} ] },
+        { id: 248709, name: "Expert Ingots", name_ru: "Ящик умельца (Слитки)", icon: "inv_crate_07", level: 20, favor: 10, rarity: "uncommon", options: [ {name:"Mithril Bar", qty:20}, {name:"Steel Bar", qty:15}, {name:"Gold Bar", qty:10} ] },
+        { id: 248708, name: "Expert Fabrics", name_ru: "Ящик умельца (Кожа/Ткань)", icon: "inv_crate_07", level: 20, favor: 10, rarity: "uncommon", options: [ {name:"Bolt of Mageweave", qty:8}, {name:"Cured Heavy Hide", qty:2} ] },
+        { id: 248710, name: "Expert Parts", name_ru: "Ящик умельца (Детали)", icon: "inv_crate_07", level: 10, favor: 5, rarity: "uncommon", options: [ {name:"Iron Strut", qty:8}, {name:"Mithril Tube", qty:5}, {name:"Unstable Trigger", qty:12}, {name:"Mithril Casing", qty:5} ] },
+        
+        { id: 248695, name: "Earthly Artisan Herbs", name_ru: "Ящик искусника (Корни и стебли)", icon: "inv_crate_07", level: 35, favor: 15, rarity: "common", options: [ {name:"Golden Sansam", qty:10}, {name:"Sungrass", qty:20}, {name:"Blindweed", qty:10}, {name:"Ghost Mushroom", qty:10}, {name:"Gromsblood", qty:10} ] },
+        { id: 248696, name: "Flowering Artisan Herbs", name_ru: "Ящик искусника (Цветущие Травы)", icon: "inv_crate_07", level: 35, favor: 15, rarity: "common", options: [ {name:"Dreamfoil", qty:20}, {name:"Mountain Silversage", qty:20}, {name:"Plaguebloom", qty:20}, {name:"Icecap", qty:20} ] },
+        { id: 248697, name: "Artisan Ore", name_ru: "Ящик искусника (Руда)", icon: "inv_crate_07", level: 35, favor: 15, rarity: "common", options: [ {name:"Truesilver Ore", qty:10}, {name:"Thorium Ore", qty:20}, {name:"Dark Iron Ore", qty:20} ] },
+        { id: 248698, name: "Artisan Textiles", name_ru: "Ящик искусника (Ткань)", icon: "inv_crate_07", level: 35, favor: 15, rarity: "common", options: [ {name:"Runecloth", qty:40}, {name:"Thick Leather", qty:20}, {name:"Rugged Leather", qty:20} ] },
+        { id: 248699, name: "Artisan Curiosities", name_ru: "Ящик искусника (Диковинки)", icon: "inv_crate_07", level: 35, favor: 15, rarity: "common", options: [ {name:"Dream Dust", qty:20}, {name:"Greater Nether Essence", qty:4}, {name:"Small Brilliant Shard", qty:6}, {name:"Large Brilliant Shard", qty:2} ] },
+        { id: 248712, name: "Artisan Ingots", name_ru: "Ящик искусника (Слитки)", icon: "inv_crate_07", level: 35, favor: 15, rarity: "uncommon", options: [ {name:"Dark Iron Bar", qty:2}, {name:"Truesilver Bar", qty:10}, {name:"Thorium Bar", qty:20} ] },
+        { id: 248711, name: "Artisan Fabrics", name_ru: "Ящик искусника (Кожа/Ткань)", icon: "inv_crate_07", level: 35, favor: 15, rarity: "uncommon", options: [ {name:"Bolt of Runecloth", qty:8}, {name:"Cured Thick Hide", qty:2} ] },
+        { id: 248713, name: "Artisan Parts", name_ru: "Ящик искусника (Детали)", icon: "inv_crate_07", level: 10, favor: 5, rarity: "uncommon", options: [ {name:"Thorium Widget", qty:5}, {name:"Truesilver Transformer", qty:5}, {name:"Thorium Tube", qty:2} ] }
+    ];
+
+    let currentData = [];
+
+    function getWowheadUrl(itemId, lang) {
+        if (!itemId) return '#';
+        return lang === 'ru' ? `https://www.wowhead.com/forever/ru/item=${itemId}` : `https://www.wowhead.com/forever/item=${itemId}`;
+    }
+
+    function formatWoWMoney(copperValue) {
+        if (copperValue === null || copperValue === undefined || isNaN(copperValue)) return '—';
+        const copper = Math.round(copperValue);
+        const gold = Math.floor(copper / 10000);
+        const silver = Math.floor((copper % 10000) / 100);
+        const remainingCopper = copper % 100;
+
+        const goldIcon = '<img src="https://wow.zamimg.com/images/wow/icons/small/inv_misc_coin_01.jpg" style="width: 14px; height: 14px; vertical-align: middle; margin-left: 2px;">';
+        const silverIcon = '<img src="https://wow.zamimg.com/images/wow/icons/small/inv_misc_coin_02.jpg" style="width: 14px; height: 14px; vertical-align: middle; margin-left: 2px;">';
+        const copperIcon = '<img src="https://wow.zamimg.com/images/wow/icons/small/inv_misc_coin_03.jpg" style="width: 14px; height: 14px; vertical-align: middle; margin-left: 2px;">';
+
+        let result = '';
+        if (gold > 0) result += `${gold} ${goldIcon} `;
+        if (silver > 0 || (gold > 0 && remainingCopper > 0)) result += `${silver} ${silverIcon} `;
+        if (remainingCopper > 0 || (gold === 0 && silver === 0)) result += `${remainingCopper} ${copperIcon}`;
+        return result.trim();
+    }
+
+    // Читаем данные из глобальной переменной, которую создал GitHub Action
+    function getPrice(itemId) {
+        if (window.AUCTION_DATA && window.AUCTION_DATA[String(itemId)] !== undefined) {
+            return window.AUCTION_DATA[String(itemId)];
+        }
+        return null;
+    }
+
+    function loadData() {
+        const maxLevel = parseInt(document.getElementById('maxLevel').value) || 60;
+        const filteredCrates = cratesData.filter(c => c.level <= maxLevel);
+
+        const preparedData = [];
+
+        for (const crate of filteredCrates) {
+            const cratePrice = getPrice(crate.id);
+
+            const crateOptions = [];
+            for (const opt of crate.options) {
+                const itemInfo = itemDB[opt.name];
+                const itemId = itemInfo ? itemInfo.id : null;
+                const price = itemId ? getPrice(itemId) : null;
+
+                const totalCost = price ? price * opt.qty : null;
+                const costPerFavor = totalCost ? totalCost / crate.favor : null;
+
+                crateOptions.push({
+                    name: opt.name,
+                    qty: opt.qty,
+                    price: price,
+                    totalCost: totalCost,
+                    costPerFavor: costPerFavor
+                });
+            }
+            
+            crateOptions.sort((a, b) => {
+                if (a.costPerFavor === null) return 1;
+                if (b.costPerFavor === null) return -1;
+                return a.costPerFavor - b.costPerFavor;
+            });
+            
+            const validOptions = crateOptions.filter(o => o.costPerFavor !== null);
+            const bestCost = validOptions.length > 0 ? validOptions[0].costPerFavor : Infinity;
+
+            preparedData.push({
+                ...crate,
+                price: cratePrice,
+                options: crateOptions,
+                bestCost: bestCost
+            });
+        }
+
+        currentData = preparedData;
+        renderTable();
+    }
+
+    function renderTable() {
+        const t = translations[currentLang];
+        const tableBody = document.getElementById('tableBody');
+        tableBody.innerHTML = '';
+        
+        if (currentData.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="2" style="text-align:center; padding: 20px;">${t.noData}</td></tr>`;
+            return;
+        }
+
+        const sortBy = document.getElementById('sortBy').value;
+        const onlyBest = document.getElementById('onlyBest').checked;
+
+        currentData.sort((a, b) => {
+            const nameA = currentLang === 'ru' ? a.name_ru : a.name;
+            const nameB = currentLang === 'ru' ? b.name_ru : b.name;
+            if (sortBy === 'level') return a.level - b.level;
+            if (sortBy === 'costAsc') {
+                if (a.bestCost === Infinity) return 1;
+                if (b.bestCost === Infinity) return -1;
+                return a.bestCost - b.bestCost;
+            }
+            if (sortBy === 'costDesc') {
+                if (a.bestCost === Infinity) return 1;
+                if (b.bestCost === Infinity) return -1;
+                return b.bestCost - a.bestCost;
+            }
+            if (sortBy === 'name') return nameA.localeCompare(nameB);
+            return 0;
+        });
+
+        for (const crate of currentData) {
+            const tr = document.createElement('tr');
+            const crateUrl = getWowheadUrl(crate.id, currentLang);
+            const rarityClass = crate.rarity === 'uncommon' ? 'uncommon' : 'common';
+            const displayCrateName = currentLang === 'ru' ? crate.name_ru : crate.name;
+            
+            const crateCellHtml = `
+                <td class="crate-cell">
+                    <div class="crate-content">
+                        <div class="crate-name">
+                            <a href="${crateUrl}" target="_blank" class="icon-link" style="justify-content: center;">
+                                <div class="icon-wrapper ${rarityClass}" style="width: 36px; height: 36px;">
+                                    <img src="https://wow.zamimg.com/images/wow/icons/medium/${crate.icon}.jpg" 
+                                         onerror="this.src='https://wow.zamimg.com/images/wow/icons/medium/inv_misc_questionmark.jpg'" 
+                                         alt="${displayCrateName}" class="item-icon" style="width: 100%; height: 100%;">
+                                </div>
+                                ${displayCrateName}
+                            </a>
+                        </div>
+                        <div class="crate-meta">
+                            <div>${t.crateLevel} <strong>${crate.level}</strong></div>
+                            <div>${t.crateFavor} <strong>${crate.favor} Favor</strong></div>
+                            <div>${t.cratePrice} <strong>${crate.price ? formatWoWMoney(crate.price) : t.noPrice}</strong></div>
+                        </div>
+                    </div>
+                </td>
+            `;
+            
+            let resourcesHtml = '<td class="resources-container">';
+            let optionsToShow = onlyBest ? [crate.options[0]] : crate.options;
+
+            const validOptions = crate.options.filter(o => o.costPerFavor !== null);
+            const bestCost = validOptions.length > 0 ? validOptions[0].costPerFavor : 0;
+            const worstCost = validOptions.length > 0 ? validOptions[validOptions.length - 1].costPerFavor : 0;
+            const diff = worstCost - bestCost;
+
+            for (const opt of optionsToShow) {
+                const itemInfo = itemDB[opt.name];
+                const itemId = itemInfo ? itemInfo.id : null;
+                const url = getWowheadUrl(itemId, currentLang);
+                const iconUrl = `https://wow.zamimg.com/images/wow/icons/medium/${itemInfo ? itemInfo.icon : 'inv_misc_questionmark'}.jpg`;
+                const displayOptName = currentLang === 'ru' && itemInfo ? itemInfo.name_ru : opt.name;
+                
+                let rowClass = 'row-mid';
+                let textClass = 'profit-text-mid';
+                
+                if (opt.costPerFavor !== null) {
+                    if (onlyBest || opt.costPerFavor === bestCost || (diff > 0 && opt.costPerFavor < bestCost + (diff * 0.3))) {
+                        rowClass = 'row-high';
+                        textClass = 'profit-text-high';
+                    } else if (opt.costPerFavor === worstCost || (diff > 0 && opt.costPerFavor > worstCost - (diff * 0.3))) {
+                        rowClass = 'row-low';
+                        textClass = 'profit-text-low';
+                    }
+                } else {
+                    rowClass = '';
+                    textClass = 'text-muted';
+                }
+
+                const costText = opt.costPerFavor !== null ? formatWoWMoney(opt.costPerFavor) : t.noPrice;
+                const itemPriceText = opt.price !== null ? formatWoWMoney(opt.price) : t.noPrice;
+                
+                resourcesHtml += `
+                    <div class="resource-row ${rowClass}">
+                        <a href="${url}" target="_blank" class="icon-link">
+                            <div class="icon-wrapper common">
+                                <img src="${iconUrl}" 
+                                     onerror="this.src='https://wow.zamimg.com/images/wow/icons/medium/inv_misc_questionmark.jpg'" 
+                                     alt="${displayOptName}" class="item-icon">
+                            </div>
+                            <span style="font-weight: 500;">${displayOptName} × ${opt.qty}</span>
+                        </a>
+                        <div class="price-info">
+                            <span style="color: #a6adc8; font-size: 0.9em; width: 100px; text-align: right;">
+                                ${itemPriceText}
+                            </span>
+                            <span class="${textClass}" style="width: 120px; text-align: right; font-size: 1.1em;" title="Cost per 1 Favor">
+                                ${costText}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }
+            resourcesHtml += '</td>';
+            
+            tr.innerHTML = crateCellHtml + resourcesHtml;
+            tableBody.appendChild(tr);
+        }
+    }
+
+    // Инициализация при загрузке
+    window.onload = () => { 
+        setLang('ru'); 
+        loadData(); 
+    };
+
+    document.getElementById('maxLevel').addEventListener('change', loadData);
+    document.getElementById('sortBy').addEventListener('change', renderTable);
+    document.getElementById('onlyBest').addEventListener('change', renderTable);
+</script>
+</body>
+</html>
