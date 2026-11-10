@@ -76,7 +76,7 @@
         .th-price-item { width: 100px; text-align: right; }
         .th-price-favor { width: 120px; text-align: right; }
         
-        /* Стили для иконок валюты, чтобы они ровно стояли в тексте */
+        /* Стили для иконок валюты */
         .coin-icon {
             width: 14px;
             height: 14px;
@@ -137,7 +137,7 @@
     </table>
 </div>
 
-<!-- ПОДКЛЮЧАЕМ ФАЙЛ С ДАННЫМИ, КОТОРЫЙ СГЕНЕРИРУЕТ GITHUB -->
+<!-- ПОДКЛЮЧАЕМ ФАЙЛ С ДАННЫМИ, КОТОРЫЙ СГЕНЕРИРУЕТ GITHUB ACTION -->
 <script src="auction-data.js"></script>
 
 <script>
@@ -335,26 +335,25 @@
         return lang === 'ru' ? `https://www.wowhead.com/forever/ru/item=${itemId}` : `https://www.wowhead.com/forever/item=${itemId}`;
     }
 
-  function formatWoWMoney(copperValue) {
-    if (copperValue === null || copperValue === undefined || isNaN(copperValue)) return '—';
-    const copper = Math.round(copperValue);
-    const gold = Math.floor(copper / 10000);
-    const silver = Math.floor((copper % 10000) / 100);
-    const remainingCopper = copper % 100;
+    function formatWoWMoney(copperValue) {
+        if (copperValue === null || copperValue === undefined || isNaN(copperValue)) return '—';
+        const copper = Math.round(copperValue);
+        const gold = Math.floor(copper / 10000);
+        const silver = Math.floor((copper % 10000) / 100);
+        const remainingCopper = copper % 100;
 
-    // Используем проверенные иконки монет с Wowhead (INV_Misc_Coin_xx)
-    const goldIcon = '<img src="https://wow.zamimg.com/images/wow/icons/medium/inv_misc_coin_01.jpg" class="coin-icon" alt="g">';
-    const silverIcon = '<img src="https://wow.zamimg.com/images/wow/icons/medium/inv_misc_coin_03.jpg" class="coin-icon" alt="s">';
-    const copperIcon = '<img src="https://wow.zamimg.com/images/wow/icons/medium/inv_misc_coin_05.jpg" class="coin-icon" alt="c">';
+        // ИСПОЛЬЗУЕМ ИКОНКИ ИЗ ИНТЕРФЕЙСА ИГРЫ (INV_Misc_Coin_01, 03, 05)
+        const goldIcon = '<img src="https://wow.zamimg.com/images/wow/icons/medium/inv_misc_coin_01.jpg" class="coin-icon" alt="g">';
+        const silverIcon = '<img src="https://wow.zamimg.com/images/wow/icons/medium/inv_misc_coin_03.jpg" class="coin-icon" alt="s">';
+        const copperIcon = '<img src="https://wow.zamimg.com/images/wow/icons/medium/inv_misc_coin_05.jpg" class="coin-icon" alt="c">';
 
-    let result = '';
-    if (gold > 0) result += `${gold} ${goldIcon} `;
-    if (silver > 0 || (gold > 0 && remainingCopper > 0)) result += `${silver} ${silverIcon} `;
-    if (remainingCopper > 0 || (gold === 0 && silver === 0)) result += `${remainingCopper} ${copperIcon}`;
-    return result.trim();
-}
+        let result = '';
+        if (gold > 0) result += `${gold} ${goldIcon} `;
+        if (silver > 0 || (gold > 0 && remainingCopper > 0)) result += `${silver} ${silverIcon} `;
+        if (remainingCopper > 0 || (gold === 0 && silver === 0)) result += `${remainingCopper} ${copperIcon}`;
+        return result.trim();
+    }
 
-    // Читаем данные из глобальной переменной, которую создал GitHub Action
     function getPrice(itemId) {
         if (window.AUCTION_DATA && window.AUCTION_DATA[String(itemId)] !== undefined) {
             return window.AUCTION_DATA[String(itemId)];
@@ -536,7 +535,6 @@
         renderTable();
     }
 
-    // Инициализация при загрузке
     window.onload = () => { 
         setLang('ru'); 
         loadData(); 
