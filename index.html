@@ -75,6 +75,16 @@
         .th-price-info { display: flex; gap: 20px; min-width: 220px; justify-content: flex-end; }
         .th-price-item { width: 100px; text-align: right; }
         .th-price-favor { width: 120px; text-align: right; }
+        
+        /* Стили для иконок валюты, чтобы они ровно стояли в тексте */
+        .coin-icon {
+            width: 14px;
+            height: 14px;
+            vertical-align: -2px;
+            margin-left: 2px;
+            margin-right: 4px;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -332,9 +342,10 @@
         const silver = Math.floor((copper % 10000) / 100);
         const remainingCopper = copper % 100;
 
-        const goldIcon = '<img src="https://wow.zamimg.com/images/wow/icons/small/inv_misc_coin_01.jpg" style="width: 14px; height: 14px; vertical-align: middle; margin-left: 2px;">';
-        const silverIcon = '<img src="https://wow.zamimg.com/images/wow/icons/small/inv_misc_coin_02.jpg" style="width: 14px; height: 14px; vertical-align: middle; margin-left: 2px;">';
-        const copperIcon = '<img src="https://wow.zamimg.com/images/wow/icons/small/inv_misc_coin_03.jpg" style="width: 14px; height: 14px; vertical-align: middle; margin-left: 2px;">';
+        // ИСПОЛЬЗУЕМ ИКОНКИ ИЗ ИНТЕРФЕЙСА ИГРЫ (UI)
+        const goldIcon = '<img src="https://wow.zamimg.com/images/wow/icons/small/ui-goldicon.jpg" class="coin-icon" alt="g">';
+        const silverIcon = '<img src="https://wow.zamimg.com/images/wow/icons/small/ui-silvericon.jpg" class="coin-icon" alt="s">';
+        const copperIcon = '<img src="https://wow.zamimg.com/images/wow/icons/small/ui-coppericon.jpg" class="coin-icon" alt="c">';
 
         let result = '';
         if (gold > 0) result += `${gold} ${goldIcon} `;
@@ -518,6 +529,11 @@
             tr.innerHTML = crateCellHtml + resourcesHtml;
             tableBody.appendChild(tr);
         }
+    }
+
+    function changeSort(type) {
+        document.getElementById('sortBy').value = type;
+        renderTable();
     }
 
     // Инициализация при загрузке
