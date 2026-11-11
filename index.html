@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WoW Forever: Калькулятор выгоды Merchant's Favor</title>
+    <title>WoW Forever: Инструменты игрока</title>
     <style>
         :root {
             --bg: #1e1e2e; --surface: #2a2a3c; --text: #cdd6f4; --accent: #89b4fa;
@@ -22,6 +22,22 @@
         h1 { color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; text-align: center; }
         .container { max-width: 1500px; margin: 0 auto; }
         
+        /* Навигация */
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; }
+        .header h1 { border: none; margin: 0; padding: 0; }
+        .lang-switch { display: flex; gap: 5px; background: var(--bg); padding: 4px; border-radius: 4px; border: 1px solid var(--border); }
+        .lang-btn { background: transparent; color: var(--text); border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-weight: bold; }
+        .lang-btn.active { background: var(--accent); color: var(--bg); }
+        
+        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+        .nav-btn { padding: 12px 24px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.2s; }
+        .nav-btn:hover { background: var(--hover); }
+        .nav-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* Общие стили для элементов управления */
         .controls { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; align-items: center; background: var(--surface); padding: 15px; border-radius: 8px; justify-content: center; }
         .controls label { font-weight: bold; }
         .controls select, .controls input { padding: 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
@@ -29,17 +45,15 @@
         .controls input[type="checkbox"] { width: auto; cursor: pointer; }
         .btn { padding: 10px 20px; background: var(--accent); color: var(--bg); border: none; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn:hover { background: #b4befe; }
-        .lang-switch { display: flex; gap: 5px; background: var(--bg); padding: 4px; border-radius: 4px; border: 1px solid var(--border); }
-        .lang-btn { background: transparent; color: var(--text); border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-weight: bold; }
-        .lang-btn.active { background: var(--accent); color: var(--bg); }
         
+        /* Таблицы */
         table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        th, td { padding: 0; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
-        th { padding: 12px 15px; background-color: #313244; cursor: pointer; position: sticky; top: 0; z-index: 10; user-select: none; text-align: center; }
-        th:hover { background-color: var(--accent); color: var(--bg); }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        th { background-color: #313244; position: sticky; top: 0; z-index: 10; user-select: none; }
         
+        /* Стили для Калькулятора Торговых Обязательств */
         .crate-cell { border-right: 2px solid var(--border); background-color: #252535; width: 20%; vertical-align: middle; }
-        .crate-content { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; height: 100%; padding: 15px; }
+        .crate-content { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; height: 100%; }
         .crate-name { font-weight: bold; color: var(--accent); margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.1em; flex-wrap: wrap; }
         .crate-meta { font-size: 0.9em; color: #a6adc8; display: flex; flex-direction: column; gap: 4px; align-items: center; }
         
@@ -53,6 +67,7 @@
         .icon-wrapper.common { border: 1px solid var(--rarity-common); }
         .icon-wrapper.uncommon { border: 1px solid var(--rarity-uncommon); box-shadow: inset 0 0 4px var(--rarity-uncommon); }
         .item-icon { width: 28px; height: 28px; border-radius: 2px; background-color: #000; object-fit: cover; display: block; }
+        .item-icon-small { width: 20px; height: 20px; border-radius: 2px; vertical-align: middle; margin-right: 5px; border: 1px solid #000; }
         
         .row-high { background-color: var(--bg-profit-high); border-left: 4px solid var(--border-profit-high); }
         .row-mid { background-color: var(--bg-profit-mid); border-left: 4px solid var(--border-profit-mid); }
@@ -62,121 +77,169 @@
         .profit-text-mid { color: var(--gold); font-weight: bold; }
         .profit-text-low { color: var(--red); font-weight: bold; }
         .text-muted { color: #a6adc8; font-style: italic; }
-        
-        /* Стиль для отрицательной стоимости (когда мы зарабатываем) */
         .profit-negative { color: #1eff00; font-weight: bold; text-shadow: 0 0 5px rgba(30, 255, 0, 0.5); }
         
         .price-info { display: flex; gap: 10px; align-items: center; min-width: 450px; justify-content: flex-end; }
         
+        /* Стили для Калькулятора Профессий */
+        .prof-step-row { transition: background-color 0.2s; }
+        .prof-step-row:hover { background-color: var(--hover); }
+        .skill-range { font-weight: bold; color: var(--accent); }
+        .recipe-name { font-weight: bold; display: flex; align-items: center; }
+        .materials-list { font-size: 0.9em; color: #a6adc8; display: flex; flex-direction: column; gap: 4px; }
+        .material-item { display: flex; justify-content: space-between; align-items: center; }
+        .material-cost { color: var(--gold); font-weight: bold; text-align: right; }
+        .total-cost-row td { background-color: #313244; font-weight: bold; border-top: 2px solid var(--border); font-size: 1.1em; }
+        
         .notes { font-size: 0.9em; color: #a6adc8; margin-top: 20px; padding: 15px; background: var(--surface); border-radius: 8px; border-left: 4px solid var(--accent); }
-        .status-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.8em; font-weight: bold; }
-        .status-ok { background: var(--green); color: var(--bg); }
-        .status-error { background: var(--red); color: var(--bg); }
-
-        .th-resources-inner { display: flex; align-items: center; width: 100%; padding-left: 15px; padding-right: 15px; box-sizing: border-box; }
-        .th-res-name { flex: 1; text-align: left; min-width: 200px; }
-        .th-price-info { display: flex; gap: 10px; min-width: 450px; justify-content: flex-end; }
+        
+        .coin-icon { width: 14px; height: 14px; vertical-align: -2px; margin-left: 2px; margin-right: 4px; display: inline-block; }
         
         .col-price { width: 90px; text-align: right; }
         .col-total { width: 110px; text-align: right; color: #a6adc8; }
         .col-favor { width: 90px; text-align: right; }
-        .col-net { width: 140px; text-align: right; color: var(--green); font-weight: bold; }
+        .col-net { width: 140px; text-align: right; font-weight: bold; }
         
-        .coin-icon {
-            width: 14px;
-            height: 14px;
-            vertical-align: -2px;
-            margin-left: 2px;
-            margin-right: 4px;
-            display: inline-block;
-        }
+        .th-resources-inner { display: flex; align-items: center; width: 100%; }
+        .th-res-name { flex: 1; text-align: left; min-width: 200px; }
+        .th-price-info { display: flex; gap: 10px; min-width: 450px; justify-content: flex-end; }
     </style>
 </head>
 <body>
 <div class="container">
-    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px;">
-        <h1 id="title-text" style="border: none; margin: 0; padding: 0;">📦 Калькулятор выгоды Merchant's Favor</h1>
+    <!-- Шапка -->
+    <div class="header">
+        <h1 id="title-text">📦 WoW Forever: Инструменты игрока</h1>
         <div class="lang-switch">
             <button class="lang-btn active" onclick="setLang('ru')">RU</button>
             <button class="lang-btn" onclick="setLang('en')">ENG</button>
         </div>
     </div>
-    
-    <div class="controls">
-        <div>
-            <label for="maxLevel" id="lbl-maxLevel">Макс. уровень:</label>
-            <input type="number" id="maxLevel" value="60" min="1" max="60">
-        </div>
-        <div>
-            <label for="sortBy" id="lbl-sortBy">Сортировать:</label>
-            <select id="sortBy">
-                <option value="level" id="opt-level">По уровню</option>
-                <option value="costAsc" id="opt-costAsc">По выгоде (дешевле)</option>
-                <option value="costDesc" id="opt-costDesc">По выгоде (дороже)</option>
-                <option value="name" id="opt-name">По названию</option>
-            </select>
-        </div>
-        <div style="display: flex; align-items: center; gap: 5px;">
-            <input type="checkbox" id="onlyBest">
-            <label for="onlyBest" id="lbl-onlyBest" style="cursor: pointer;">Выгодное</label>
-        </div>
-        <span id="status" class="status-badge status-ok">Данные загружены</span>
+
+    <!-- Навигация -->
+    <div class="nav-tabs">
+        <button class="nav-btn active" id="btn-tab-favor" onclick="switchTab('favor')">Торговые обязательства</button>
+        <button class="nav-btn" id="btn-tab-prof" onclick="switchTab('prof')">Калькулятор профессий</button>
+        <button class="nav-btn" id="btn-tab-soon" onclick="switchTab('soon')">Coming soon...</button>
     </div>
 
-    <table id="resultsTable">
-        <thead>
-            <tr>
-                <th onclick="changeSort('level')" id="th-crate">Ящик / Уровень</th>
-                <th id="th-resources" style="cursor: default;">
-                    <div class="th-resources-inner">
-                        <span class="th-res-name" id="th-res-name">Варианты ресурсов</span>
-                        <div class="th-price-info">
-                            <span class="col-price" id="th-price-item">Цена / шт.</span>
-                            <span class="col-total" id="th-price-total" title="Ресурсы + Ящик">Общая ст-ть</span>
-                            <span class="col-favor" id="th-cost-favor">Цена 1 Favor</span>
-                            <span class="col-net" id="th-cost-net">С учетом дохода</span>
+    <!-- Вкладка 1: Торговые обязательства -->
+    <div id="tab-favor" class="tab-content active">
+        <div class="controls">
+            <div>
+                <label for="maxLevel" id="lbl-maxLevel">Макс. уровень:</label>
+                <input type="number" id="maxLevel" value="60" min="1" max="60">
+            </div>
+            <div>
+                <label for="sortBy" id="lbl-sortBy">Сортировать:</label>
+                <select id="sortBy">
+                    <option value="level" id="opt-level">По уровню</option>
+                    <option value="costAsc" id="opt-costAsc">По выгоде (дешевле)</option>
+                    <option value="costDesc" id="opt-costDesc">По выгоде (дороже)</option>
+                    <option value="name" id="opt-name">По названию</option>
+                </select>
+            </div>
+            <div style="display: flex; align-items: center; gap: 5px;">
+                <input type="checkbox" id="onlyBest">
+                <label for="onlyBest" id="lbl-onlyBest" style="cursor: pointer;">Выгодное</label>
+            </div>
+        </div>
+
+        <table id="resultsTable">
+            <thead>
+                <tr>
+                    <th id="th-crate">Ящик / Уровень</th>
+                    <th id="th-resources">
+                        <div class="th-resources-inner">
+                            <span class="th-res-name" id="th-res-name">Варианты ресурсов</span>
+                            <div class="th-price-info">
+                                <span class="col-price" id="th-price-item">Цена / шт.</span>
+                                <span class="col-total" id="th-price-total" title="Ресурсы + Ящик">Общая ст-ть</span>
+                                <span class="col-favor" id="th-cost-favor">Цена 1 Favor</span>
+                                <span class="col-net" id="th-cost-net">С учетом дохода</span>
+                            </div>
                         </div>
-                    </div>
-                </th>
-            </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-    </table>
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="favorBody"></tbody>
+        </table>
+    </div>
+
+    <!-- Вкладка 2: Профессии -->
+    <div id="tab-prof" class="tab-content">
+        <div class="controls">
+            <div>
+                <label for="professionSelect" id="lbl-profession">Профессия:</label>
+                <select id="professionSelect">
+                    <option value="blacksmithing" id="opt-bs">Кузнечное дело (Blacksmithing)</option>
+                </select>
+            </div>
+            <div>
+                <label for="currentSkill" id="lbl-current">Текущий навык:</label>
+                <input type="number" id="currentSkill" value="1" min="1" max="300">
+            </div>
+            <div>
+                <label for="targetSkill" id="lbl-target">Целевой навык:</label>
+                <input type="number" id="targetSkill" value="300" min="1" max="300">
+            </div>
+            <button class="btn" onclick="renderProfessions()" id="btn-update-prof">Обновить</button>
+        </div>
+
+        <table id="profTable">
+            <thead>
+                <tr>
+                    <th id="th-skill">Уровень</th>
+                    <th id="th-recipe">Рецепт</th>
+                    <th id="th-mats">Материалы (на 1 крафт)</th>
+                    <th id="th-crafts">Крафтов</th>
+                    <th id="th-total-prof" style="text-align: right;">Общая стоимость</th>
+                </tr>
+            </thead>
+            <tbody id="profBody"></tbody>
+        </table>
+    </div>
+
+    <!-- Вкладка 3: Coming Soon -->
+    <div id="tab-soon" class="tab-content">
+        <div style="text-align: center; padding: 50px; font-size: 1.5em; color: #a6adc8;">
+            🚧 В разработке... 🚧
+        </div>
+    </div>
+
 </div>
 
+<!-- Подключаем файл с ценами -->
 <script src="auction-data.js"></script>
 
 <script>
+    // --- 1. ЛОКАЛИЗАЦИЯ ---
     const translations = {
         ru: {
-            title: "📦 Калькулятор выгоды Merchant's Favor",
+            title: "📦 WoW Forever: Инструменты игрока",
+            navFavor: "Торговые обязательства", navProf: "Калькулятор профессий", navSoon: "Coming soon...",
             lblMaxLevel: "Макс. уровень:", lblSortBy: "Сортировать:",
             optLevel: "По уровню", optCostAsc: "По выгоде (дешевле)", optCostDesc: "По выгоде (дороже)", optName: "По названию",
             lblOnlyBest: "Выгодное",
-            thCrate: "Ящик / Уровень", 
-            thResName: "Варианты ресурсов",
-            thPriceItem: "Цена / шт.",
-            thPriceTotal: "Общая ст-ть",
-            thCostFavor: "Цена 1 Favor",
-            thCostNet: "С учетом дохода",
-            crateLevel: "Мин. уровень:", crateFavor: "Награда:", cratePrice: "Цена на аукционе:",
-            crateGoldReward: "Золото за сдачу:",
-            noPrice: "—", noData: "Нет данных. Возможно, GitHub Action еще не сгенерировал файл."
+            thCrate: "Ящик / Уровень", thResName: "Варианты ресурсов", thPriceItem: "Цена / шт.", thPriceTotal: "Общая ст-ть", thCostFavor: "Цена 1 Favor", thCostNet: "С учетом дохода",
+            crateLevel: "Мин. уровень:", crateFavor: "Награда:", cratePrice: "Цена на аукционе:", crateGoldReward: "Золото за сдачу:", noPrice: "—",
+            
+            lblProfession: "Профессия:", optBS: "Кузнечное дело", lblCurrent: "Текущий навык:", lblTarget: "Целевой навык:", btnUpdate: "Обновить",
+            thSkill: "Уровень", thRecipe: "Рецепт", thMats: "Материалы (на 1 крафт)", thCrafts: "Крафтов", thTotalProf: "Общая стоимость",
+            totalRoute: "Итого на весь маршрут:", missingPrices: "⚠️ Некоторые цены отсутствуют. Убедитесь, что GitHub Action обновил данные."
         },
         en: {
-            title: "📦 Merchant's Favor Profit Calculator",
+            title: "📦 WoW Forever: Player Tools",
+            navFavor: "Merchant's Favor", navProf: "Profession Calculator", navSoon: "Coming soon...",
             lblMaxLevel: "Max Level:", lblSortBy: "Sort by:",
             optLevel: "By Level", optCostAsc: "By Profit (Cheapest)", optCostDesc: "By Profit (Most Expensive)", optName: "By Name",
             lblOnlyBest: "Best only",
-            thCrate: "Crate / Level", 
-            thResName: "Resource Options",
-            thPriceItem: "Cost / item",
-            thPriceTotal: "Total Cost",
-            thCostFavor: "Cost 1 Favor",
-            thCostNet: "Net Cost 1 Favor",
-            crateLevel: "Min Level:", crateFavor: "Reward:", cratePrice: "Auction Price:",
-            crateGoldReward: "Gold Reward:",
-            noPrice: "—", noData: "No data. GitHub Action might not have generated the file yet."
+            thCrate: "Crate / Level", thResName: "Resource Options", thPriceItem: "Cost / item", thPriceTotal: "Total Cost", thCostFavor: "Cost 1 Favor", thCostNet: "Net Cost 1 Favor",
+            crateLevel: "Min Level:", crateFavor: "Reward:", cratePrice: "Auction Price:", crateGoldReward: "Gold Reward:", noPrice: "—",
+            
+            lblProfession: "Profession:", optBS: "Blacksmithing", lblCurrent: "Current Skill:", lblTarget: "Target Skill:", btnUpdate: "Update",
+            thSkill: "Skill Range", thRecipe: "Recipe", thMats: "Materials (per craft)", thCrafts: "Crafts", thTotalProf: "Total Cost",
+            totalRoute: "Total for the route:", missingPrices: "⚠️ Some prices are missing. Make sure GitHub Action updated the data."
         }
     };
 
@@ -189,6 +252,12 @@
         
         const t = translations[lang];
         document.getElementById('title-text').innerText = t.title;
+        
+        document.getElementById('btn-tab-favor').innerText = t.navFavor;
+        document.getElementById('btn-tab-prof').innerText = t.navProf;
+        document.getElementById('btn-tab-soon').innerText = t.navSoon;
+        
+        // Favor Tab
         document.getElementById('lbl-maxLevel').innerText = t.lblMaxLevel;
         document.getElementById('lbl-sortBy').innerText = t.lblSortBy;
         document.getElementById('opt-level').innerText = t.optLevel;
@@ -203,10 +272,42 @@
         document.getElementById('th-cost-favor').innerText = t.thCostFavor;
         document.getElementById('th-cost-net').innerText = t.thCostNet;
         
-        if (currentData.length > 0) renderTable();
+        // Prof Tab
+        document.getElementById('lbl-profession').innerText = t.lblProfession;
+        document.getElementById('opt-bs').innerText = t.optBS;
+        document.getElementById('lbl-current').innerText = t.lblCurrent;
+        document.getElementById('lbl-target').innerText = t.lblTarget;
+        document.getElementById('btn-update-prof').innerText = t.btnUpdate;
+        document.getElementById('th-skill').innerText = t.thSkill;
+        document.getElementById('th-recipe').innerText = t.thRecipe;
+        document.getElementById('th-mats').innerText = t.thMats;
+        document.getElementById('th-crafts').innerText = t.thCrafts;
+        document.getElementById('th-total-prof').innerText = t.thTotalProf;
+
+        renderFavorTable(); // Перерисовываем таблицы при смене языка
+        renderProfessions();
     }
 
+    // --- 2. ДАННЫЕ ---
+    // Общая база предметов (и ресурсы для крафта, и ящики)
     const itemDB = {
+        // Ресурсы для Крафта
+        "2835": { name_ru: "Грубый камень", icon: "inv_stone_06" },
+        "2840": { name_ru: "Медный слиток", icon: "inv_ingot_02" },
+        "2841": { name_ru: "Бронзовый слиток", icon: "inv_ingot_bronze" },
+        "2842": { name_ru: "Серебряный слиток", icon: "inv_ingot_01" },
+        "3478": { name_ru: "Зернистый шлифовальный камень", icon: "inv_stone_grinding_stone" },
+        "3575": { name_ru: "Железный слиток", icon: "inv_ingot_iron" },
+        "3577": { name_ru: "Золотой слиток", icon: "inv_ingot_03" },
+        "3860": { name_ru: "Мифриловый слиток", icon: "inv_ingot_06" },
+        "4338": { name_ru: "Ткань из магической ткани", icon: "inv_fabric_mageweave_01" },
+        "12359": { name_ru: "Ториевый слиток", icon: "inv_ingot_07" },
+        "2605": { name_ru: "Зеленая краска", icon: "inv_potion_12" },
+        "3486": { name_ru: "Тяжелый шлифовальный камень", icon: "inv_stone_grinding_stone" },
+        "6037": { name_ru: "Слиток истинного серебра", icon: "inv_ingot_08" },
+        "12365": { name_ru: "Плотный камень", icon: "inv_stone_12" },
+
+        // Ресурсы для Ящиков (имена для поиска ID)
         "Peacebloom": { id: 2447, name_ru: "Мироцвет", icon: "inv_misc_flower_02" },
         "Silverleaf": { id: 765, name_ru: "Сребролист", icon: "inv_misc_herb_10" },
         "Earthroot": { id: 2449, name_ru: "Землекорень", icon: "inv_misc_herb_07" },
@@ -307,72 +408,86 @@
     };
 
     const cratesData = [
-        { id: 248682, name: "Apprentice Herbs", name_ru: "Ящик ученика (Травы)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 250, rarity: "common", options: [ {name:"Peacebloom", qty:20}, {name:"Silverleaf", qty:20}, {name:"Earthroot", qty:10}, {name:"Mageroyal", qty:10}, {name:"Briarthorn", qty:10} ] },
-        { id: 248683, name: "Apprentice Ore", name_ru: "Ящик ученика (Руда)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 250, rarity: "common", options: [ {name:"Copper Ore", qty:20}, {name:"Tin Ore", qty:20} ] },
-        { id: 248684, name: "Apprentice Textiles", name_ru: "Ящик ученика (Ткань)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 250, rarity: "common", options: [ {name:"Linen Cloth", qty:40}, {name:"Light Leather", qty:20} ] },
-        { id: 248685, name: "Apprentice Curiosities", name_ru: "Ящик ученика (Диковинки)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 250, rarity: "common", options: [ {name:"Strange Dust", qty:20}, {name:"Greater Magic Essence", qty:4}, {name:"Small Glimmering Shard", qty:6}, {name:"Large Glimmering Shard", qty:2} ] },
-        { id: 248703, name: "Apprentice Ingots", name_ru: "Ящик ученика (Слитки)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 500, rarity: "uncommon", options: [ {name:"Copper Bar", qty:20}, {name:"Tin Bar", qty:20}, {name:"Bronze Bar", qty:10} ] },
-        { id: 248704, name: "Apprentice Parts", name_ru: "Ящик ученика (Детали)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 500, rarity: "uncommon", options: [ {name:"Handful of Copper Bolts", qty:16}, {name:"Copper Tube", qty:16}, {name:"Copper Modulator", qty:4} ] },
-        { id: 248702, name: "Apprentice Fabrics", name_ru: "Ящик ученика (Кожа/Ткань)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 500, rarity: "uncommon", options: [ {name:"Cured Light Hide", qty:2}, {name:"Bolt of Linen Cloth", qty:20} ] },
+        { id: 248682, name_ru: "Ящик ученика (Травы)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Peacebloom", qty:20}, {name:"Silverleaf", qty:20}, {name:"Earthroot", qty:10}, {name:"Mageroyal", qty:10}, {name:"Briarthorn", qty:10} ] },
+        { id: 248683, name_ru: "Ящик ученика (Руда)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Copper Ore", qty:20}, {name:"Tin Ore", qty:20} ] },
+        { id: 248684, name_ru: "Ящик ученика (Ткань)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Linen Cloth", qty:40}, {name:"Light Leather", qty:20} ] },
+        { id: 248685, name_ru: "Ящик ученика (Диковинки)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Strange Dust", qty:20}, {name:"Greater Magic Essence", qty:4}, {name:"Small Glimmering Shard", qty:6}, {name:"Large Glimmering Shard", qty:2} ] },
+        { id: 248703, name_ru: "Ящик ученика (Слитки)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "uncommon", options: [ {name:"Copper Bar", qty:20}, {name:"Tin Bar", qty:20}, {name:"Bronze Bar", qty:10} ] },
+        { id: 248704, name_ru: "Ящик ученика (Детали)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "uncommon", options: [ {name:"Handful of Copper Bolts", qty:16}, {name:"Copper Tube", qty:16}, {name:"Copper Modulator", qty:4} ] },
+        { id: 248702, name_ru: "Ящик ученика (Кожа/Ткань)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "uncommon", options: [ {name:"Cured Light Hide", qty:2}, {name:"Bolt of Linen Cloth", qty:20} ] },
         
-        { id: 248686, name: "Journeyman Herbs", name_ru: "Ящик подмастерья (Травы)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 500, rarity: "common", options: [ {name:"Stranglekelp", qty:10}, {name:"Bruiseweed", qty:10}, {name:"Wild Steelbloom", qty:10}, {name:"Grave Moss", qty:10}, {name:"Kingsblood", qty:10} ] },
-        { id: 248687, name: "Journeyman Ore", name_ru: "Ящик подмастерья (Руда)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 500, rarity: "common", options: [ {name:"Silver Ore", qty:10}, {name:"Iron Ore", qty:20} ] },
-        { id: 248688, name: "Journeyman Textiles", name_ru: "Ящик подмастерья (Ткань)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 500, rarity: "common", options: [ {name:"Wool Cloth", qty:20}, {name:"Silk Cloth", qty:40}, {name:"Medium Leather", qty:20} ] },
-        { id: 248689, name: "Journeyman Curiosities", name_ru: "Ящик подмастерья (Диковинки)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 500, rarity: "common", options: [ {name:"Soul Dust", qty:20}, {name:"Greater Astral Essence", qty:4}, {name:"Small Glowing Shard", qty:6}, {name:"Large Glowing Shard", qty:2} ] },
-        { id: 248706, name: "Journeyman Ingots", name_ru: "Ящик подмастерья (Слитки)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1000, rarity: "uncommon", options: [ {name:"Silver Bar", qty:10}, {name:"Iron Bar", qty:20} ] },
-        { id: 248705, name: "Journeyman Fabrics", name_ru: "Ящик подмастерья (Кожа/Ткань)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1000, rarity: "uncommon", options: [ {name:"Bolt of Woolen Cloth", qty:6}, {name:"Bolt of Silk Cloth", qty:10}, {name:"Cured Medium Hide", qty:2} ] },
-        { id: 248707, name: "Journeyman Parts", name_ru: "Ящик подмастерья (Детали)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1000, rarity: "uncommon", options: [ {name:"Bronze Tube", qty:8}, {name:"Whirring Bronze Gizmo", qty:7}, {name:"Bronze Framework", qty:4}, {name:"Gold Power Core", qty:45} ] },
+        { id: 248686, name_ru: "Ящик подмастерья (Травы)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Stranglekelp", qty:10}, {name:"Bruiseweed", qty:10}, {name:"Wild Steelbloom", qty:10}, {name:"Grave Moss", qty:10}, {name:"Kingsblood", qty:10} ] },
+        { id: 248687, name_ru: "Ящик подмастерья (Руда)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Silver Ore", qty:10}, {name:"Iron Ore", qty:20} ] },
+        { id: 248688, name_ru: "Ящик подмастерья (Ткань)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Wool Cloth", qty:20}, {name:"Silk Cloth", qty:40}, {name:"Medium Leather", qty:20} ] },
+        { id: 248689, name_ru: "Ящик подмастерья (Диковинки)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Soul Dust", qty:20}, {name:"Greater Astral Essence", qty:4}, {name:"Small Glowing Shard", qty:6}, {name:"Large Glowing Shard", qty:2} ] },
+        { id: 248706, name_ru: "Ящик подмастерья (Слитки)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "uncommon", options: [ {name:"Silver Bar", qty:10}, {name:"Iron Bar", qty:20} ] },
+        { id: 248705, name_ru: "Ящик подмастерья (Кожа/Ткань)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "uncommon", options: [ {name:"Bolt of Woolen Cloth", qty:6}, {name:"Bolt of Silk Cloth", qty:10}, {name:"Cured Medium Hide", qty:2} ] },
+        { id: 248707, name_ru: "Ящик подмастерья (Детали)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "uncommon", options: [ {name:"Bronze Tube", qty:8}, {name:"Whirring Bronze Gizmo", qty:7}, {name:"Bronze Framework", qty:4}, {name:"Gold Power Core", qty:45} ] },
         
-        { id: 248690, name: "Earthly Expert Herbs", name_ru: "Ящик умельца (Корни и стебли)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 1000, rarity: "common", options: [ {name:"Liferoot", qty:20}, {name:"Fadeleaf", qty:10}, {name:"Goldthorn", qty:10}, {name:"Khadgar's Whisker", qty:10} ] },
-        { id: 248691, name: "Flowering Expert Herbs", name_ru: "Ящик умельца (Цветущие Травы)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 1000, rarity: "common", options: [ {name:"Wintersbite", qty:10}, {name:"Firebloom", qty:10}, {name:"Purple Lotus", qty:20}, {name:"Arthas' Tears", qty:10} ] },
-        { id: 248692, name: "Expert Ore", name_ru: "Ящик умельца (Руда)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 1000, rarity: "common", options: [ {name:"Gold Ore", qty:10}, {name:"Mithril Ore", qty:20} ] },
-        { id: 248693, name: "Expert Textiles", name_ru: "Ящик умельца (Ткань)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 1000, rarity: "common", options: [ {name:"Mageweave Cloth", qty:40}, {name:"Heavy Leather", qty:20} ] },
-        { id: 248694, name: "Expert Curiosities", name_ru: "Ящик умельца (Диковинки)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 1000, rarity: "common", options: [ {name:"Vision Dust", qty:20}, {name:"Greater Mystic Essence", qty:4}, {name:"Small Radiant Shard", qty:6}, {name:"Large Radiant Shard", qty:2} ] },
-        { id: 248709, name: "Expert Ingots", name_ru: "Ящик умельца (Слитки)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 2000, rarity: "uncommon", options: [ {name:"Mithril Bar", qty:20}, {name:"Steel Bar", qty:15}, {name:"Gold Bar", qty:10} ] },
-        { id: 248708, name: "Expert Fabrics", name_ru: "Ящик умельца (Кожа/Ткань)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 2000, rarity: "uncommon", options: [ {name:"Bolt of Mageweave", qty:8}, {name:"Cured Heavy Hide", qty:2} ] },
-        { id: 248710, name: "Expert Parts", name_ru: "Ящик умельца (Детали)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 2000, rarity: "uncommon", options: [ {name:"Iron Strut", qty:8}, {name:"Mithril Tube", qty:5}, {name:"Unstable Trigger", qty:12}, {name:"Mithril Casing", qty:5} ] },
+        { id: 248690, name_ru: "Ящик умельца (Корни и стебли)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 3000, rarity: "common", options: [ {name:"Liferoot", qty:20}, {name:"Fadeleaf", qty:10}, {name:"Goldthorn", qty:10}, {name:"Khadgar's Whisker", qty:10} ] },
+        { id: 248691, name_ru: "Ящик умельца (Цветущие Травы)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 3000, rarity: "common", options: [ {name:"Wintersbite", qty:10}, {name:"Firebloom", qty:10}, {name:"Purple Lotus", qty:20}, {name:"Arthas' Tears", qty:10} ] },
+        { id: 248692, name_ru: "Ящик умельца (Руда)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 3000, rarity: "common", options: [ {name:"Gold Ore", qty:10}, {name:"Mithril Ore", qty:20} ] },
+        { id: 248693, name_ru: "Ящик умельца (Ткань)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 3000, rarity: "common", options: [ {name:"Mageweave Cloth", qty:40}, {name:"Heavy Leather", qty:20} ] },
+        { id: 248694, name_ru: "Ящик умельца (Диковинки)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 3000, rarity: "common", options: [ {name:"Vision Dust", qty:20}, {name:"Greater Mystic Essence", qty:4}, {name:"Small Radiant Shard", qty:6}, {name:"Large Radiant Shard", qty:2} ] },
+        { id: 248709, name_ru: "Ящик умельца (Слитки)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 3000, rarity: "uncommon", options: [ {name:"Mithril Bar", qty:20}, {name:"Steel Bar", qty:15}, {name:"Gold Bar", qty:10} ] },
+        { id: 248708, name_ru: "Ящик умельца (Кожа/Ткань)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 3000, rarity: "uncommon", options: [ {name:"Bolt of Mageweave", qty:8}, {name:"Cured Heavy Hide", qty:2} ] },
+        { id: 248710, name_ru: "Ящик умельца (Детали)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "uncommon", options: [ {name:"Iron Strut", qty:8}, {name:"Mithril Tube", qty:5}, {name:"Unstable Trigger", qty:12}, {name:"Mithril Casing", qty:5} ] },
         
-        { id: 248695, name: "Earthly Artisan Herbs", name_ru: "Ящик искусника (Корни и стебли)", icon: "inv_crate_07", level: 35, favor: 15, gold_reward: 2000, rarity: "common", options: [ {name:"Golden Sansam", qty:10}, {name:"Sungrass", qty:20}, {name:"Blindweed", qty:10}, {name:"Ghost Mushroom", qty:10}, {name:"Gromsblood", qty:10} ] },
-        { id: 248696, name: "Flowering Artisan Herbs", name_ru: "Ящик искусника (Цветущие Травы)", icon: "inv_crate_07", level: 35, favor: 15, gold_reward: 2000, rarity: "common", options: [ {name:"Dreamfoil", qty:20}, {name:"Mountain Silversage", qty:20}, {name:"Plaguebloom", qty:20}, {name:"Icecap", qty:20} ] },
-        { id: 248697, name: "Artisan Ore", name_ru: "Ящик искусника (Руда)", icon: "inv_crate_07", level: 35, favor: 15, gold_reward: 2000, rarity: "common", options: [ {name:"Truesilver Ore", qty:10}, {name:"Thorium Ore", qty:20}, {name:"Dark Iron Ore", qty:20} ] },
-        { id: 248698, name: "Artisan Textiles", name_ru: "Ящик искусника (Ткань)", icon: "inv_crate_07", level: 35, favor: 15, gold_reward: 2000, rarity: "common", options: [ {name:"Runecloth", qty:40}, {name:"Thick Leather", qty:20}, {name:"Rugged Leather", qty:20} ] },
-        { id: 248699, name: "Artisan Curiosities", name_ru: "Ящик искусника (Диковинки)", icon: "inv_crate_07", level: 35, favor: 15, gold_reward: 2000, rarity: "common", options: [ {name:"Dream Dust", qty:20}, {name:"Greater Nether Essence", qty:4}, {name:"Small Brilliant Shard", qty:6}, {name:"Large Brilliant Shard", qty:2} ] },
-        { id: 248712, name: "Artisan Ingots", name_ru: "Ящик искусника (Слитки)", icon: "inv_crate_07", level: 35, favor: 15, gold_reward: 4000, rarity: "uncommon", options: [ {name:"Dark Iron Bar", qty:2}, {name:"Truesilver Bar", qty:10}, {name:"Thorium Bar", qty:20} ] },
-        { id: 248711, name: "Artisan Fabrics", name_ru: "Ящик искусника (Кожа/Ткань)", icon: "inv_crate_07", level: 35, favor: 15, gold_reward: 4000, rarity: "uncommon", options: [ {name:"Bolt of Runecloth", qty:8}, {name:"Cured Thick Hide", qty:2} ] },
-        { id: 248713, name: "Artisan Parts", name_ru: "Ящик искусника (Детали)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 4000, rarity: "uncommon", options: [ {name:"Thorium Widget", qty:5}, {name:"Truesilver Transformer", qty:5}, {name:"Thorium Tube", qty:2} ] }
+        { id: 248695, name_ru: "Ящик искусника (Корни и стебли)", icon: "inv_crate_07", level: 35, favor: 15, gold_reward: 5000, rarity: "common", options: [ {name:"Golden Sansam", qty:10}, {name:"Sungrass", qty:20}, {name:"Blindweed", qty:10}, {name:"Ghost Mushroom", qty:10}, {name:"Gromsblood", qty:10} ] },
+        { id: 248696, name_ru: "Ящик искусника (Цветущие Травы)", icon: "inv_crate_07", level: 35, favor: 15, gold_reward: 5000, rarity: "common", options: [ {name:"Dreamfoil", qty:20}, {name:"Mountain Silversage", qty:20}, {name:"Plaguebloom", qty:20}, {name:"Icecap", qty:20} ] },
+        { id: 248697, name_ru: "Ящик искусника (Руда)", icon: "inv_crate_07", level: 35, favor: 15, gold_reward: 5000, rarity: "common", options: [ {name:"Truesilver Ore", qty:10}, {name:"Thorium Ore", qty:20}, {name:"Dark Iron Ore", qty:20} ] },
+        { id: 248698, name_ru: "Ящик искусника (Ткань)", icon: "inv_crate_07", level: 35, favor: 15, gold_reward: 5000, rarity: "common", options: [ {name:"Runecloth", qty:40}, {name:"Thick Leather", qty:20}, {name:"Rugged Leather", qty:20} ] },
+        { id: 248699, name_ru: "Ящик искусника (Диковинки)", icon: "inv_crate_07", level: 35, favor: 15, gold_reward: 5000, rarity: "common", options: [ {name:"Dream Dust", qty:20}, {name:"Greater Nether Essence", qty:4}, {name:"Small Brilliant Shard", qty:6}, {name:"Large Brilliant Shard", qty:2} ] },
+        { id: 248712, name_ru: "Ящик искусника (Слитки)", icon: "inv_crate_07", level: 35, favor: 15, gold_reward: 5000, rarity: "uncommon", options: [ {name:"Dark Iron Bar", qty:2}, {name:"Truesilver Bar", qty:10}, {name:"Thorium Bar", qty:20} ] },
+        { id: 248711, name_ru: "Ящик искусника (Кожа/Ткань)", icon: "inv_crate_07", level: 35, favor: 15, gold_reward: 5000, rarity: "uncommon", options: [ {name:"Bolt of Runecloth", qty:8}, {name:"Cured Thick Hide", qty:2} ] },
+        { id: 248713, name_ru: "Ящик искусника (Детали)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "uncommon", options: [ {name:"Thorium Widget", qty:5}, {name:"Truesilver Transformer", qty:5}, {name:"Thorium Tube", qty:2} ] }
     ];
 
-    let currentData = [];
+    // Маршрут кузнечного дела (start, end, name_ru, name_en, icon, materials (id: qty), isTrainer)
+    const blacksmithingRoute = [
+        [1, 25, "Грубый точильный камень", "Rough Sharpening Stone", "inv_stone_sharpening_stone_01", {"2835": 1}, true],
+        [25, 45, "Грубое шлифовальное колесо", "Rough Grinding Stone", "inv_stone_grinding_stone", {"2835": 2}, true],
+        [45, 75, "Медный пояс", "Copper Chain Belt", "inv_belt_05", {"2840": 6}, true],
+        [75, 90, "Рунные медные рукавицы", "Runed Copper Gauntlets", "inv_gauntlets_04", {"2840": 8, "3478": 2}, true],
+        [90, 115, "Рунный медный пояс", "Runed Copper Belt", "inv_belt_05", {"2840": 10}, true],
+        [115, 125, "Грубые бронзовые поножи", "Rough Bronze Leggings", "inv_pants_04", {"2841": 6}, true],
+        [125, 145, "Серебряные бронзовые рукавицы", "Silvered Bronze Gauntlets", "inv_gauntlets_11", {"2841": 8, "2842": 1, "3478": 2}, true],
+        [145, 160, "Зеленые железные наручи", "Green Iron Bracers", "inv_bracer_03", {"3575": 6, "2605": 1}, true],
+        [160, 180, "Золотые чешуйчатые поножи", "Golden Scale Leggings", "inv_pants_08", {"3575": 10, "3577": 2, "3486": 1}, true],
+        [180, 200, "Тяжелые мифриловые рукавицы", "Heavy Mithril Gauntlet", "inv_gauntlets_23", {"3860": 6, "4338": 4}, true],
+        [200, 210, "Мифриловый капюшон", "Mithril Coif", "inv_helmet_25", {"3860": 10, "4338": 6}, true],
+        [210, 225, "Тяжелый мифриловый нагрудник", "Heavy Mithril Breastplate", "inv_chest_chain_15", {"3860": 16}, true],
+        [225, 235, "Мифриловые шпоры", "Mithril Spurs", "inv_misc_spurs_01", {"3860": 4, "4338": 2}, false],
+        [235, 246, "Тяжелые мифриловые сапоги", "Heavy Mithril Boots", "inv_boots_01", {"3860": 14}, true],
+        [246, 250, "Изысканные мифриловые поножи", "Ornate Mithril Pants", "inv_pants_04", {"3860": 12}, true],
+        [250, 257, "Плотный точильный камень", "Dense Sharpening Stone", "inv_misc_stone_sharpeningstone_03", {"12365": 1}, true],
+        [257, 270, "Ториевые наручи", "Thorium Bracers", "inv_bracer_04", {"12359": 8}, true],
+        [270, 275, "Сияющий пояс", "Radiant Belt", "inv_belt_12", {"12359": 10}, true],
+        [275, 279, "Имперские пластинчатые наручи", "Imperial Plate Bracers", "inv_bracer_16", {"12359": 12}, true],
+        [279, 285, "Ториевые поножи", "Thorium Leggings", "inv_pants_09", {"12359": 12}, true],
+        [285, 292, "Сияющий нагрудник", "Radiant Breastplate", "inv_chest_plate_12", {"12359": 14}, true],
+        [292, 299, "Имперский пластинчатый нагрудник", "Imperial Plate Chest", "inv_chest_plate_16", {"12359": 16}, true],
+        [299, 300, "Неуязвимая кольчуга", "Invulnerable Mail", "inv_chest_chain_12", {"12359": 20, "6037": 4}, true]
+    ];
 
-    function getWowheadUrl(itemId, lang) {
-        if (!itemId) return '#';
-        return lang === 'ru' ? `https://www.wowhead.com/forever/ru/item=${itemId}` : `https://www.wowhead.com/forever/item=${itemId}`;
-    }
-
-    // ФУНКЦИЯ С ПОДДЕРЖКОЙ ОТРИЦАТЕЛЬНЫХ ЗНАЧЕНИЙ
+    // --- 3. ФУНКЦИИ ---
+    
     function formatWoWMoney(copperValue) {
         if (copperValue === null || copperValue === undefined || isNaN(copperValue)) return '—';
-        
         const isNegative = copperValue < 0;
         const copper = Math.abs(Math.round(copperValue));
-        
         const gold = Math.floor(copper / 10000);
         const silver = Math.floor((copper % 10000) / 100);
         const remainingCopper = copper % 100;
-
-        const goldIcon = '<img src="https://wow.zamimg.com/images/wow/icons/medium/inv_misc_coin_01.jpg" class="coin-icon" alt="g">';
-        const silverIcon = '<img src="https://wow.zamimg.com/images/wow/icons/medium/inv_misc_coin_03.jpg" class="coin-icon" alt="s">';
-        const copperIcon = '<img src="https://wow.zamimg.com/images/wow/icons/medium/inv_misc_coin_05.jpg" class="coin-icon" alt="c">';
-
+        const goldIcon = '<img src="https://wow.zamimg.com/images/wow/icons/medium/inv_misc_coin_01.jpg" class="coin-icon">';
+        const silverIcon = '<img src="https://wow.zamimg.com/images/wow/icons/medium/inv_misc_coin_03.jpg" class="coin-icon">';
+        const copperIcon = '<img src="https://wow.zamimg.com/images/wow/icons/medium/inv_misc_coin_05.jpg" class="coin-icon">';
         let result = '';
         if (gold > 0) result += `${gold} ${goldIcon} `;
         if (silver > 0 || (gold > 0 && remainingCopper > 0)) result += `${silver} ${silverIcon} `;
         if (remainingCopper > 0 || (gold === 0 && silver === 0)) result += `${remainingCopper} ${copperIcon}`;
-        
         let formatted = result.trim();
-        if (isNegative && formatted !== '') {
-            formatted = '-' + formatted;
-        }
+        if (isNegative && formatted !== '') formatted = '-' + formatted;
         return formatted || '0';
     }
 
@@ -383,113 +498,74 @@
         return null;
     }
 
-    function loadData() {
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById('tab-' + tabId).classList.add('active');
+        document.getElementById('btn-tab-' + tabId).classList.add('active');
+    }
+
+    // --- РЕНДЕР ТОРГОВЫХ ОБЯЗАТЕЛЬСТВ ---
+    function renderFavorTable() {
+        const t = translations[currentLang];
+        const tableBody = document.getElementById('favorBody');
+        tableBody.innerHTML = '';
+        
         const maxLevel = parseInt(document.getElementById('maxLevel').value) || 60;
-        const filteredCrates = cratesData.filter(c => c.level <= maxLevel);
+        const sortBy = document.getElementById('sortBy').value;
+        const onlyBest = document.getElementById('onlyBest').checked;
 
-        const preparedData = [];
+        let preparedData = [];
 
-        for (const crate of filteredCrates) {
+        cratesData.filter(c => c.level <= maxLevel).forEach(crate => {
             const cratePrice = getPrice(crate.id) || 0;
-
             const crateOptions = [];
-            for (const opt of crate.options) {
+            
+            crate.options.forEach(opt => {
                 const itemInfo = itemDB[opt.name];
                 const itemId = itemInfo ? itemInfo.id : null;
                 const price = itemId ? getPrice(itemId) : null;
 
-                let totalCost = null;
-                let costPerFavor = null;
-                let netCostPerFavor = null;
-
+                let totalCost = null, costPerFavor = null, netCostPerFavor = null;
                 if (price !== null) {
                     totalCost = (price * opt.qty) + cratePrice;
                     costPerFavor = totalCost / crate.favor;
-                    
                     if (crate.gold_reward !== undefined) {
                         netCostPerFavor = (totalCost - crate.gold_reward) / crate.favor;
                     }
                 }
-
-                crateOptions.push({
-                    name: opt.name,
-                    qty: opt.qty,
-                    price: price,
-                    totalCost: totalCost,
-                    costPerFavor: costPerFavor,
-                    netCostPerFavor: netCostPerFavor
-                });
-            }
-            
-            crateOptions.sort((a, b) => {
-                if (a.netCostPerFavor === null) return 1;
-                if (b.netCostPerFavor === null) return -1;
-                return a.netCostPerFavor - b.netCostPerFavor;
+                crateOptions.push({ name: opt.name, qty: opt.qty, price, totalCost, costPerFavor, netCostPerFavor });
             });
             
+            crateOptions.sort((a, b) => (a.netCostPerFavor === null) ? 1 : (b.netCostPerFavor === null) ? -1 : a.netCostPerFavor - b.netCostPerFavor);
             const validOptions = crateOptions.filter(o => o.netCostPerFavor !== null);
             const bestCost = validOptions.length > 0 ? validOptions[0].netCostPerFavor : Infinity;
+            
+            preparedData.push({ ...crate, price: cratePrice, options: crateOptions, bestCost });
+        });
 
-            preparedData.push({
-                ...crate,
-                price: cratePrice,
-                options: crateOptions,
-                bestCost: bestCost
-            });
-        }
-
-        currentData = preparedData;
-        renderTable();
-    }
-
-    function renderTable() {
-        const t = translations[currentLang];
-        const tableBody = document.getElementById('tableBody');
-        tableBody.innerHTML = '';
-        
-        if (currentData.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="2" style="text-align:center; padding: 20px;">${t.noData}</td></tr>`;
-            return;
-        }
-
-        const sortBy = document.getElementById('sortBy').value;
-        const onlyBest = document.getElementById('onlyBest').checked;
-
-        currentData.sort((a, b) => {
-            const nameA = currentLang === 'ru' ? a.name_ru : a.name;
-            const nameB = currentLang === 'ru' ? b.name_ru : b.name;
+        preparedData.sort((a, b) => {
             if (sortBy === 'level') return a.level - b.level;
-            if (sortBy === 'costAsc') {
-                if (a.bestCost === Infinity) return 1;
-                if (b.bestCost === Infinity) return -1;
-                return a.bestCost - b.bestCost;
-            }
-            if (sortBy === 'costDesc') {
-                if (a.bestCost === Infinity) return 1;
-                if (b.bestCost === Infinity) return -1;
-                return b.bestCost - a.bestCost;
-            }
-            if (sortBy === 'name') return nameA.localeCompare(nameB);
+            if (sortBy === 'costAsc') return a.bestCost === Infinity ? 1 : b.bestCost === Infinity ? -1 : a.bestCost - b.bestCost;
+            if (sortBy === 'costDesc') return a.bestCost === Infinity ? 1 : b.bestCost === Infinity ? -1 : b.bestCost - a.bestCost;
+            if (sortBy === 'name') return a.name_ru.localeCompare(b.name_ru);
             return 0;
         });
 
-        for (const crate of currentData) {
+        preparedData.forEach(crate => {
             const tr = document.createElement('tr');
-            const crateUrl = getWowheadUrl(crate.id, currentLang);
             const rarityClass = crate.rarity === 'uncommon' ? 'uncommon' : 'common';
-            const displayCrateName = currentLang === 'ru' ? crate.name_ru : crate.name;
             
             const crateCellHtml = `
                 <td class="crate-cell">
                     <div class="crate-content">
                         <div class="crate-name">
-                            <a href="${crateUrl}" target="_blank" class="icon-link" style="justify-content: center;">
+                            <a href="#" onclick="return false;" class="icon-link" style="justify-content: center;">
                                 <div class="icon-wrapper ${rarityClass}" style="width: 36px; height: 36px;">
-                                    <img src="https://wow.zamimg.com/images/wow/icons/medium/${crate.icon}.jpg" 
-                                         onerror="this.src='https://wow.zamimg.com/images/wow/icons/medium/inv_misc_questionmark.jpg'" 
-                                         alt="${displayCrateName}" class="item-icon" style="width: 100%; height: 100%;">
+                                    <img src="https://wow.zamimg.com/images/wow/icons/medium/${crate.icon}.jpg" class="item-icon" style="width: 100%; height: 100%;">
                                 </div>
-                                ${displayCrateName}
+                                ${crate.name_ru}
                             </a>
                         </div>
                         <div class="crate-meta">
@@ -510,86 +586,119 @@
             const worstCost = validOptions.length > 0 ? validOptions[validOptions.length - 1].netCostPerFavor : 0;
             const diff = worstCost - bestCost;
 
-            for (const opt of optionsToShow) {
+            optionsToShow.forEach(opt => {
                 const itemInfo = itemDB[opt.name];
-                const itemId = itemInfo ? itemInfo.id : null;
-                const url = getWowheadUrl(itemId, currentLang);
-                const iconUrl = `https://wow.zamimg.com/images/wow/icons/medium/${itemInfo ? itemInfo.icon : 'inv_misc_questionmark'}.jpg`;
-                const displayOptName = currentLang === 'ru' && itemInfo ? itemInfo.name_ru : opt.name;
-                
-                let rowClass = 'row-mid';
-                let textClass = 'profit-text-mid';
-                let netTextClass = ''; 
+                let rowClass = 'row-mid', textClass = 'profit-text-mid', netTextClass = '';
                 
                 if (opt.netCostPerFavor !== null) {
-                    if (opt.netCostPerFavor < 0) {
-                        rowClass = 'row-high';
-                        textClass = 'profit-text-high';
-                        netTextClass = 'profit-negative';
-                    } else if (onlyBest || opt.netCostPerFavor === bestCost || (diff > 0 && opt.netCostPerFavor < bestCost + (diff * 0.3))) {
-                        rowClass = 'row-high';
-                        textClass = 'profit-text-high';
-                    } else if (opt.netCostPerFavor === worstCost || (diff > 0 && opt.netCostPerFavor > worstCost - (diff * 0.3))) {
-                        rowClass = 'row-low';
-                        textClass = 'profit-text-low';
-                    }
-                } else {
-                    rowClass = '';
-                    textClass = 'text-muted';
-                }
+                    if (opt.netCostPerFavor < 0) { rowClass = 'row-high'; textClass = 'profit-text-high'; netTextClass = 'profit-negative'; }
+                    else if (onlyBest || opt.netCostPerFavor === bestCost || (diff > 0 && opt.netCostPerFavor < bestCost + (diff * 0.3))) { rowClass = 'row-high'; textClass = 'profit-text-high'; }
+                    else if (opt.netCostPerFavor === worstCost || (diff > 0 && opt.netCostPerFavor > worstCost - (diff * 0.3))) { rowClass = 'row-low'; textClass = 'profit-text-low'; }
+                } else { rowClass = ''; textClass = 'text-muted'; }
 
-                const costText = opt.costPerFavor !== null ? formatWoWMoney(opt.costPerFavor) : t.noPrice;
-                const netCostText = opt.netCostPerFavor !== null ? formatWoWMoney(opt.netCostPerFavor) : t.noPrice;
-                const itemPriceText = opt.price !== null ? formatWoWMoney(opt.price) : t.noPrice;
-                const totalCostText = opt.totalCost !== null ? formatWoWMoney(opt.totalCost) : t.noPrice;
-                
                 resourcesHtml += `
                     <div class="resource-row ${rowClass}">
-                        <a href="${url}" target="_blank" class="icon-link">
+                        <a href="#" onclick="return false;" class="icon-link">
                             <div class="icon-wrapper common">
-                                <img src="${iconUrl}" 
-                                     onerror="this.src='https://wow.zamimg.com/images/wow/icons/medium/inv_misc_questionmark.jpg'" 
-                                     alt="${displayOptName}" class="item-icon">
+                                <img src="https://wow.zamimg.com/images/wow/icons/medium/${itemInfo ? itemInfo.icon : 'inv_misc_questionmark'}.jpg" class="item-icon">
                             </div>
-                            <span style="font-weight: 500;">${displayOptName} × ${opt.qty}</span>
+                            <span style="font-weight: 500;">${itemInfo ? itemInfo.name_ru : opt.name} × ${opt.qty}</span>
                         </a>
                         <div class="price-info">
-                            <span class="col-price" style="color: #a6adc8;">
-                                ${itemPriceText}
-                            </span>
-                            <span class="col-total">
-                                ${totalCostText}
-                            </span>
-                            <span class="col-favor ${textClass}">
-                                ${costText}
-                            </span>
-                            <span class="col-net ${netTextClass || textClass}" style="font-size: 1.1em;" title="Net Cost per 1 Favor">
-                                ${netCostText}
-                            </span>
+                            <span class="col-price" style="color: #a6adc8;">${opt.price !== null ? formatWoWMoney(opt.price) : t.noPrice}</span>
+                            <span class="col-total">${opt.totalCost !== null ? formatWoWMoney(opt.totalCost) : t.noPrice}</span>
+                            <span class="col-favor ${textClass}">${opt.costPerFavor !== null ? formatWoWMoney(opt.costPerFavor) : t.noPrice}</span>
+                            <span class="col-net ${netTextClass || textClass}" style="font-size: 1.1em;">${opt.netCostPerFavor !== null ? formatWoWMoney(opt.netCostPerFavor) : t.noPrice}</span>
                         </div>
                     </div>
                 `;
-            }
+            });
             resourcesHtml += '</td>';
-            
             tr.innerHTML = crateCellHtml + resourcesHtml;
             tableBody.appendChild(tr);
+        });
+    }
+
+    // --- РЕНДЕР ПРОФЕССИЙ ---
+    function renderProfessions() {
+        const t = translations[currentLang];
+        const currentSkill = parseInt(document.getElementById('currentSkill').value) || 1;
+        const targetSkill = parseInt(document.getElementById('targetSkill').value) || 300;
+        const tbody = document.getElementById('profBody');
+        tbody.innerHTML = '';
+
+        let grandTotalCost = 0;
+        let hasMissingPrices = false;
+
+        blacksmithingRoute.forEach(step => {
+            const [start, end, name_ru, name_en, icon, materials, isTrainer] = step;
+            if (end <= currentSkill || start >= targetSkill) return;
+
+            const craftsNeeded = end - start;
+            let stepTotalCost = 0;
+            let materialsHtml = '';
+
+            for (const [matId, qty] of Object.entries(materials)) {
+                const price = getPrice(matId);
+                const totalMatCost = price ? price * qty * craftsNeeded : 0;
+                if (price === null) hasMissingPrices = true;
+                stepTotalCost += totalMatCost;
+                
+                const matName = itemDB[matId] ? itemDB[matId].name_ru : `Item ${matId}`;
+                const matIcon = itemDB[matId] ? itemDB[matId].icon : 'inv_misc_questionmark';
+                const priceDisplay = price !== null ? formatWoWMoney(price) : '—';
+
+                materialsHtml += `
+                    <div class="material-item">
+                        <span>
+                            <img src="https://wow.zamimg.com/images/wow/icons/small/${matIcon}.jpg" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 4px;">
+                            ${matName} × ${qty}
+                        </span>
+                        <span class="material-cost">${priceDisplay}</span>
+                    </div>
+                `;
+            }
+
+            grandTotalCost += stepTotalCost;
+            const recipeName = currentLang === 'ru' ? name_ru : name_en;
+
+            const tr = document.createElement('tr');
+            tr.className = 'prof-step-row';
+            tr.innerHTML = `
+                <td class="skill-range">${start} - ${end}</td>
+                <td class="recipe-name">
+                    <span style="margin-right: 8px;">${isTrainer ? '📖' : '💰'}</span>
+                    <img src="https://wow.zamimg.com/images/wow/icons/small/${icon}.jpg" class="item-icon-small">
+                    ${recipeName}
+                </td>
+                <td><div class="materials-list">${materialsHtml}</div></td>
+                <td>${craftsNeeded} шт.</td>
+                <td class="material-cost">${stepTotalCost > 0 ? formatWoWMoney(stepTotalCost) : '—'}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        const totalTr = document.createElement('tr');
+        totalTr.className = 'total-cost-row';
+        totalTr.innerHTML = `<td colspan="4" style="text-align: right;">${t.totalRoute}</td><td class="material-cost">${grandTotalCost > 0 ? formatWoWMoney(grandTotalCost) : '—'}</td>`;
+        tbody.appendChild(totalTr);
+
+        if (hasMissingPrices) {
+            const warnTr = document.createElement('tr');
+            warnTr.innerHTML = `<td colspan="5" style="color: var(--red); text-align: center; font-size: 0.9em;">${t.missingPrices}</td>`;
+            tbody.appendChild(warnTr);
         }
     }
 
-    function changeSort(type) {
-        document.getElementById('sortBy').value = type;
-        renderTable();
-    }
-
+    // --- СЛУШАТЕЛИ СОБЫТИЙ ---
     window.onload = () => { 
         setLang('ru'); 
-        loadData(); 
     };
 
-    document.getElementById('maxLevel').addEventListener('change', loadData);
-    document.getElementById('sortBy').addEventListener('change', renderTable);
-    document.getElementById('onlyBest').addEventListener('change', renderTable);
+    document.getElementById('maxLevel').addEventListener('change', renderFavorTable);
+    document.getElementById('sortBy').addEventListener('change', renderFavorTable);
+    document.getElementById('onlyBest').addEventListener('change', renderFavorTable);
+
 </script>
 </body>
 </html>
