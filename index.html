@@ -63,6 +63,9 @@
         .profit-text-low { color: var(--red); font-weight: bold; }
         .text-muted { color: #a6adc8; font-style: italic; }
         
+        /* Стиль для отрицательной стоимости (когда мы зарабатываем) */
+        .profit-negative { color: #1eff00; font-weight: bold; text-shadow: 0 0 5px rgba(30, 255, 0, 0.5); }
+        
         .price-info { display: flex; gap: 10px; align-items: center; min-width: 450px; justify-content: flex-end; }
         
         .notes { font-size: 0.9em; color: #a6adc8; margin-top: 20px; padding: 15px; background: var(--surface); border-radius: 8px; border-left: 4px solid var(--accent); }
@@ -303,7 +306,6 @@
         "Bolt of Runecloth": { id: 14048, name_ru: "Рулон рунической ткани", icon: "inv_fabric_purplefire_02" }
     };
 
-    // gold_reward указан в меди (1500 = 15 серебра, 3000 = 30 сер., 5000 = 50 сер.)
     const cratesData = [
         { id: 248682, name: "Apprentice Herbs", name_ru: "Ящик ученика (Травы)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Peacebloom", qty:20}, {name:"Silverleaf", qty:20}, {name:"Earthroot", qty:10}, {name:"Mageroyal", qty:10}, {name:"Briarthorn", qty:10} ] },
         { id: 248683, name: "Apprentice Ore", name_ru: "Ящик ученика (Руда)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Copper Ore", qty:20}, {name:"Tin Ore", qty:20} ] },
@@ -347,9 +349,13 @@
         return lang === 'ru' ? `https://www.wowhead.com/forever/ru/item=${itemId}` : `https://www.wowhead.com/forever/item=${itemId}`;
     }
 
+    // ИСПРАВЛЕННАЯ ФУНКЦИЯ: Теперь корректно обрабатывает отрицательные значения
     function formatWoWMoney(copperValue) {
         if (copperValue === null || copperValue === undefined || isNaN(copperValue)) return '—';
-        const copper = Math.round(copperValue);
+        
+        const isNegative = copperValue < 0;
+        const copper = Math.abs(Math.round(copperValue));
+        
         const gold = Math.floor(copper / 10000);
         const silver = Math.floor((copper % 10000) / 100);
         const remainingCopper = copper % 100;
@@ -362,7 +368,12 @@
         if (gold > 0) result += `${gold} ${goldIcon} `;
         if (silver > 0 || (gold > 0 && remainingCopper > 0)) result += `${silver} ${silverIcon} `;
         if (remainingCopper > 0 || (gold === 0 && silver === 0)) result += `${remainingCopper} ${copperIcon}`;
-        return result.trim();
+        
+        let formatted = result.trim();
+        if (isNegative && formatted !== '') {
+            formatted = '-' + formatted;
+        }
+        return formatted || '0';
     }
 
     function getPrice(itemId) {
@@ -379,7 +390,7 @@
         const preparedData = [];
 
         for (const crate of filteredCrates) {
-            const cratePrice = getPrice(crate.id) || 0; // Если цены ящика нет, считаем 0
+            const cratePrice = getPrice(crate.id) || 0;
 
             const crateOptions = [];
             for (const opt of crate.options) {
@@ -392,13 +403,9 @@
                 let netCostPerFavor = null;
 
                 if (price !== null) {
-                    // ОБЩАЯ СТОИМОСТЬ = (Цена ресурса * Кол-во) + Цена ящика
                     totalCost = (price * opt.qty) + cratePrice;
-                    
-                    // Цена за 1 Favor без учета золота за сдачу
                     costPerFavor = totalCost / crate.favor;
                     
-                    // Чистая цена за 1 Favor (с учетом золота за сдачу)
                     if (crate.gold_reward !== undefined) {
                         netCostPerFavor = (totalCost - crate.gold_reward) / crate.favor;
                     }
@@ -414,7 +421,6 @@
                 });
             }
             
-            // Сортируем по чистому значению выгоды
             crateOptions.sort((a, b) => {
                 if (a.netCostPerFavor === null) return 1;
                 if (b.netCostPerFavor === null) return -1;
@@ -513,9 +519,15 @@
                 
                 let rowClass = 'row-mid';
                 let textClass = 'profit-text-mid';
+                let netTextClass = ''; // Дополнительный класс для отрицательных значений
                 
                 if (opt.netCostPerFavor !== null) {
-                    if (onlyBest || opt.netCostPerFavor === bestCost || (diff > 0 && opt.netCostPerFavor < bestCost + (diff * 0.3))) {
+                    if (opt.netCostPerFavor < 0) {
+                        // Если значение отрицательное — это супер-выгодно (мы зарабатываем)
+                        rowClass = 'row-high';
+                        textClass = 'profit-text-high';
+                        netTextClass = 'profit-negative';
+                    } else if (onlyBest || opt.netCostPerFavor === bestCost || (diff > 0 && opt.netCostPerFavor < bestCost + (diff * 0.3))) {
                         rowClass = 'row-high';
                         textClass = 'profit-text-high';
                     } else if (opt.netCostPerFavor === worstCost || (diff > 0 && opt.netCostPerFavor > worstCost - (diff * 0.3))) {
@@ -552,7 +564,7 @@
                             <span class="col-favor ${textClass}">
                                 ${costText}
                             </span>
-                            <span class="col-net ${textClass}" style="font-size: 1.1em;" title="Net Cost per 1 Favor">
+                            <span class="col-net ${netTextClass || textClass}" style="font-size: 1.1em;" title="Net Cost per 1 Favor">
                                 ${netCostText}
                             </span>
                         </div>
