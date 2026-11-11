@@ -7,13 +7,11 @@ function setLang(lang) {
     
     const t = translations[lang];
     
-    // Перевод заголовков
     document.getElementById('title-text').innerText = t.title;
     document.getElementById('btn-tab-favor').innerText = t.navFavor;
     document.getElementById('btn-tab-prof').innerText = t.navProf;
     document.getElementById('btn-tab-soon').innerText = t.navSoon;
     
-    // Перевод вкладки Favor
     document.getElementById('lbl-maxLevel').innerText = t.lblMaxLevel;
     document.getElementById('lbl-sortBy').innerText = t.lblSortBy;
     document.getElementById('opt-level').innerText = t.optLevel;
@@ -28,7 +26,6 @@ function setLang(lang) {
     document.getElementById('th-cost-favor').innerText = t.thCostFavor;
     document.getElementById('th-cost-net').innerText = t.thCostNet;
     
-    // Перевод вкладки Professions
     document.getElementById('lbl-profession').innerText = t.lblProfession;
     document.getElementById('opt-bs').innerText = t.optBS;
     document.getElementById('lbl-current').innerText = t.lblCurrent;
@@ -95,9 +92,9 @@ function renderFavorTable() {
         const crateOptions = [];
         
         crate.options.forEach(opt => {
-            const itemInfo = resourcesDB[opt.name];
-            const itemId = itemInfo ? itemInfo.id : null;
-            const price = itemId ? getPrice(itemId) : null;
+            // Теперь opt.id - это прямой ID предмета
+            const itemInfo = itemDB[opt.id];
+            const price = getPrice(opt.id);
 
             let totalCost = null, costPerFavor = null, netCostPerFavor = null;
             if (price !== null) {
@@ -107,7 +104,7 @@ function renderFavorTable() {
                     netCostPerFavor = (totalCost - crate.gold_reward) / crate.favor;
                 }
             }
-            crateOptions.push({ name: opt.name, qty: opt.qty, price, totalCost, costPerFavor, netCostPerFavor });
+            crateOptions.push({ id: opt.id, qty: opt.qty, price, totalCost, costPerFavor, netCostPerFavor });
         });
         
         crateOptions.sort((a, b) => (a.netCostPerFavor === null) ? 1 : (b.netCostPerFavor === null) ? -1 : a.netCostPerFavor - b.netCostPerFavor);
@@ -159,7 +156,7 @@ function renderFavorTable() {
         const diff = worstCost - bestCost;
 
         optionsToShow.forEach(opt => {
-            const itemInfo = resourcesDB[opt.name];
+            const itemInfo = itemDB[opt.id];
             let rowClass = 'row-mid', textClass = 'profit-text-mid', netTextClass = '';
             
             if (opt.netCostPerFavor !== null) {
@@ -174,7 +171,7 @@ function renderFavorTable() {
                         <div class="icon-wrapper common">
                             <img src="https://wow.zamimg.com/images/wow/icons/medium/${itemInfo ? itemInfo.icon : 'inv_misc_questionmark'}.jpg" class="item-icon">
                         </div>
-                        <span style="font-weight: 500;">${itemInfo ? itemInfo.name_ru : opt.name} × ${opt.qty}</span>
+                        <span style="font-weight: 500;">${itemInfo ? itemInfo.name_ru : 'Unknown'} × ${opt.qty}</span>
                     </a>
                     <div class="price-info">
                         <span class="col-price" style="color: #a6adc8;">${opt.price !== null ? formatWoWMoney(opt.price) : t.noPrice}</span>
@@ -216,8 +213,8 @@ function renderProfessions() {
             if (price === null) hasMissingPrices = true;
             stepTotalCost += totalMatCost;
             
-            const matName = materialsDB[matId] ? materialsDB[matId].name_ru : `Item ${matId}`;
-            const matIcon = materialsDB[matId] ? materialsDB[matId].icon : 'inv_misc_questionmark';
+            const matName = itemDB[matId] ? itemDB[matId].name_ru : `Item ${matId}`;
+            const matIcon = itemDB[matId] ? itemDB[matId].icon : 'inv_misc_questionmark';
             const priceDisplay = price !== null ? formatWoWMoney(price) : '—';
 
             materialsHtml += `
@@ -262,7 +259,6 @@ function renderProfessions() {
     }
 }
 
-// --- ИНИЦИАЛИЗАЦИЯ ---
 window.onload = () => { 
     setLang('ru'); 
 };
