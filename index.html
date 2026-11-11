@@ -349,7 +349,7 @@
         return lang === 'ru' ? `https://www.wowhead.com/forever/ru/item=${itemId}` : `https://www.wowhead.com/forever/item=${itemId}`;
     }
 
-    // ИСПРАВЛЕННАЯ ФУНКЦИЯ: Теперь корректно обрабатывает отрицательные значения
+    // ФУНКЦИЯ С ПОДДЕРЖКОЙ ОТРИЦАТЕЛЬНЫХ ЗНАЧЕНИЙ
     function formatWoWMoney(copperValue) {
         if (copperValue === null || copperValue === undefined || isNaN(copperValue)) return '—';
         
@@ -519,11 +519,10 @@
                 
                 let rowClass = 'row-mid';
                 let textClass = 'profit-text-mid';
-                let netTextClass = ''; // Дополнительный класс для отрицательных значений
+                let netTextClass = ''; 
                 
                 if (opt.netCostPerFavor !== null) {
                     if (opt.netCostPerFavor < 0) {
-                        // Если значение отрицательное — это супер-выгодно (мы зарабатываем)
                         rowClass = 'row-high';
                         textClass = 'profit-text-high';
                         netTextClass = 'profit-negative';
