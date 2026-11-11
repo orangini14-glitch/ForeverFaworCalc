@@ -174,7 +174,39 @@ const resourcesDB = {
 };
 
 const cratesData = [
-    { id: 248682, name_ru: "Ящик ученика (Травы)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Peacebloom", qty:20}, {name:"Silverleaf", qty:20}, {name:"Earthroot", qty:10}, {name:"Mageroyal", qty:10}, {name:"Briarthorn", qty:10} ] },
-    // ... (ВСТАВЬТЕ СЮДА ВЕСЬ МАССИВ cratesData ИЗ ПРЕДЫДУЩЕГО КОДА) ...
+        { id: 248682, name_ru: "Ящик ученика (Травы)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Peacebloom", qty:20}, {name:"Silverleaf", qty:20}, {name:"Earthroot", qty:10}, {name:"Mageroyal", qty:10}, {name:"Briarthorn", qty:10} ] },
+        { id: 248683, name_ru: "Ящик ученика (Руда)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Copper Ore", qty:20}, {name:"Tin Ore", qty:20} ] },
+        { id: 248684, name_ru: "Ящик ученика (Ткань)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Linen Cloth", qty:40}, {name:"Light Leather", qty:20} ] },
+        { id: 248685, name_ru: "Ящик ученика (Диковинки)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Strange Dust", qty:20}, {name:"Greater Magic Essence", qty:4}, {name:"Small Glimmering Shard", qty:6}, {name:"Large Glimmering Shard", qty:2} ] },
+        { id: 248703, name_ru: "Ящик ученика (Слитки)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "uncommon", options: [ {name:"Copper Bar", qty:20}, {name:"Tin Bar", qty:20}, {name:"Bronze Bar", qty:10} ] },
+        { id: 248704, name_ru: "Ящик ученика (Детали)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "uncommon", options: [ {name:"Handful of Copper Bolts", qty:16}, {name:"Copper Tube", qty:16}, {name:"Copper Modulator", qty:4} ] },
+        { id: 248702, name_ru: "Ящик ученика (Кожа/Ткань)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "uncommon", options: [ {name:"Cured Light Hide", qty:2}, {name:"Bolt of Linen Cloth", qty:20} ] },
+        
+        { id: 248686, name_ru: "Ящик подмастерья (Травы)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Stranglekelp", qty:10}, {name:"Bruiseweed", qty:10}, {name:"Wild Steelbloom", qty:10}, {name:"Grave Moss", qty:10}, {name:"Kingsblood", qty:10} ] },
+        { id: 248687, name_ru: "Ящик подмастерья (Руда)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Silver Ore", qty:10}, {name:"Iron Ore", qty:20} ] },
+        { id: 248688, name_ru: "Ящик подмастерья (Ткань)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Wool Cloth", qty:20}, {name:"Silk Cloth", qty:40}, {name:"Medium Leather", qty:20} ] },
+        { id: 248689, name_ru: "Ящик подмастерья (Диковинки)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Soul Dust", qty:20}, {name:"Greater Astral Essence", qty:4}, {name:"Small Glowing Shard", qty:6}, {name:"Large Glowing Shard", qty:2} ] },
+        { id: 248706, name_ru: "Ящик подмастерья (Слитки)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "uncommon", options: [ {name:"Silver Bar", qty:10}, {name:"Iron Bar", qty:20} ] },
+        { id: 248705, name_ru: "Ящик подмастерья (Кожа/Ткань)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "uncommon", options: [ {name:"Bolt of Woolen Cloth", qty:6}, {name:"Bolt of Silk Cloth", qty:10}, {name:"Cured Medium Hide", qty:2} ] },
+        { id: 248707, name_ru: "Ящик подмастерья (Детали)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "uncommon", options: [ {name:"Bronze Tube", qty:8}, {name:"Whirring Bronze Gizmo", qty:7}, {name:"Bronze Framework", qty:4}, {name:"Gold Power Core", qty:45} ] },
+        
+        { id: 248690, name_ru: "Ящик умельца (Корни и стебли)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 3000, rarity: "common", options: [ {name:"Liferoot", qty:20}, {name:"Fadeleaf", qty:10}, {name:"Goldthorn", qty:10}, {name:"Khadgar's Whisker", qty:10} ] },
+        { id: 248691, name_ru: "Ящик умельца (Цветущие Травы)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 3000, rarity: "common", options: [ {name:"Wintersbite", qty:10}, {name:"Firebloom", qty:10}, {name:"Purple Lotus", qty:20}, {name:"Arthas' Tears", qty:10} ] },
+        { id: 248692, name_ru: "Ящик умельца (Руда)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 3000, rarity: "common", options: [ {name:"Gold Ore", qty:10}, {name:"Mithril Ore", qty:20} ] },
+        { id: 248693, name_ru: "Ящик умельца (Ткань)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 3000, rarity: "common", options: [ {name:"Mageweave Cloth", qty:40}, {name:"Heavy Leather", qty:20} ] },
+        { id: 248694, name_ru: "Ящик умельца (Диковинки)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 3000, rarity: "common", options: [ {name:"Vision Dust", qty:20}, {name:"Greater Mystic Essence", qty:4}, {name:"Small Radiant Shard", qty:6}, {name:"Large Radiant Shard", qty:2} ] },
+        { id: 248709, name_ru: "Ящик умельца (Слитки)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 3000, rarity: "uncommon", options: [ {name:"Mithril Bar", qty:20}, {name:"Steel Bar", qty:15}, {name:"Gold Bar", qty:10} ] },
+        { id: 248708, name_ru: "Ящик умельца (Кожа/Ткань)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 3000, rarity: "uncommon", options: [ {name:"Bolt of Mageweave", qty:8}, {name:"Cured Heavy Hide", qty:2} ] },
+        { id: 248710, name_ru: "Ящик умельца (Детали)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "uncommon", options: [ {name:"Iron Strut", qty:8}, {name:"Mithril Tube", qty:5}, {name:"Unstable Trigger", qty:12}, {name:"Mithril Casing", qty:5} ] },
+        
+        { id: 248695, name_ru: "Ящик искусника (Корни и стебли)", icon: "inv_crate_07", level: 35, favor: 15, gold_reward: 5000, rarity: "common", options: [ {name:"Golden Sansam", qty:10}, {name:"Sungrass", qty:20}, {name:"Blindweed", qty:10}, {name:"Ghost Mushroom", qty:10}, {name:"Gromsblood", qty:10} ] },
+        { id: 248696, name_ru: "Ящик искусника (Цветущие Травы)", icon: "inv_crate_07", level: 35, favor: 15, gold_reward: 5000, rarity: "common", options: [ {name:"Dreamfoil", qty:20}, {name:"Mountain Silversage", qty:20}, {name:"Plaguebloom", qty:20}, {name:"Icecap", qty:20} ] },
+        { id: 248697, name_ru: "Ящик искусника (Руда)", icon: "inv_crate_07", level: 35, favor: 15, gold_reward: 5000, rarity: "common", options: [ {name:"Truesilver Ore", qty:10}, {name:"Thorium Ore", qty:20}, {name:"Dark Iron Ore", qty:20} ] },
+        { id: 248698, name_ru: "Ящик искусника (Ткань)", icon: "inv_crate_07", level: 35, favor: 15, gold_reward: 5000, rarity: "common", options: [ {name:"Runecloth", qty:40}, {name:"Thick Leather", qty:20}, {name:"Rugged Leather", qty:20} ] },
+        { id: 248699, name_ru: "Ящик искусника (Диковинки)", icon: "inv_crate_07", level: 35, favor: 15, gold_reward: 5000, rarity: "common", options: [ {name:"Dream Dust", qty:20}, {name:"Greater Nether Essence", qty:4}, {name:"Small Brilliant Shard", qty:6}, {name:"Large Brilliant Shard", qty:2} ] },
+        { id: 248712, name_ru: "Ящик искусника (Слитки)", icon: "inv_crate_07", level: 35, favor: 15, gold_reward: 5000, rarity: "uncommon", options: [ {name:"Dark Iron Bar", qty:2}, {name:"Truesilver Bar", qty:10}, {name:"Thorium Bar", qty:20} ] },
+        { id: 248711, name_ru: "Ящик искусника (Кожа/Ткань)", icon: "inv_crate_07", level: 35, favor: 15, gold_reward: 5000, rarity: "uncommon", options: [ {name:"Bolt of Runecloth", qty:8}, {name:"Cured Thick Hide", qty:2} ] },
+        { id: 248713, name_ru: "Ящик искусника (Детали)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "uncommon", options: [ {name:"Thorium Widget", qty:5}, {name:"Truesilver Transformer", qty:5}, {name:"Thorium Tube", qty:2} ] }
+    ];
     // Для экономии места в этом сообщении я его пропустил, но вы его скопируйте полностью!
 ];
