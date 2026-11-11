@@ -20,7 +20,7 @@
         }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: background 0.3s; }
         h1 { color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; text-align: center; }
-        .container { max-width: 1500px; margin: 0 auto; } /* Расширили контейнер */
+        .container { max-width: 1500px; margin: 0 auto; }
         
         .controls { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; align-items: center; background: var(--surface); padding: 15px; border-radius: 8px; justify-content: center; }
         .controls label { font-weight: bold; }
@@ -63,7 +63,6 @@
         .profit-text-low { color: var(--red); font-weight: bold; }
         .text-muted { color: #a6adc8; font-style: italic; }
         
-        /* Контейнер для 4 колонок цен */
         .price-info { display: flex; gap: 10px; align-items: center; min-width: 450px; justify-content: flex-end; }
         
         .notes { font-size: 0.9em; color: #a6adc8; margin-top: 20px; padding: 15px; background: var(--surface); border-radius: 8px; border-left: 4px solid var(--accent); }
@@ -71,17 +70,15 @@
         .status-ok { background: var(--green); color: var(--bg); }
         .status-error { background: var(--red); color: var(--bg); }
 
-        /* Шапка для 4 колонок */
         .th-resources-inner { display: flex; align-items: center; width: 100%; padding-left: 15px; padding-right: 15px; box-sizing: border-box; }
         .th-res-name { flex: 1; text-align: left; min-width: 200px; }
         .th-price-info { display: flex; gap: 10px; min-width: 450px; justify-content: flex-end; }
         
         .col-price { width: 90px; text-align: right; }
-        .col-total { width: 100px; text-align: right; color: #a6adc8; }
+        .col-total { width: 110px; text-align: right; color: #a6adc8; }
         .col-favor { width: 90px; text-align: right; }
         .col-net { width: 140px; text-align: right; color: var(--green); font-weight: bold; }
         
-        /* Стили для иконок валюты */
         .coin-icon {
             width: 14px;
             height: 14px;
@@ -132,7 +129,7 @@
                         <span class="th-res-name" id="th-res-name">Варианты ресурсов</span>
                         <div class="th-price-info">
                             <span class="col-price" id="th-price-item">Цена / шт.</span>
-                            <span class="col-total" id="th-price-total">Общая ст-ть</span>
+                            <span class="col-total" id="th-price-total" title="Ресурсы + Ящик">Общая ст-ть</span>
                             <span class="col-favor" id="th-cost-favor">Цена 1 Favor</span>
                             <span class="col-net" id="th-cost-net">С учетом дохода</span>
                         </div>
@@ -306,24 +303,23 @@
         "Bolt of Runecloth": { id: 14048, name_ru: "Рулон рунической ткани", icon: "inv_fabric_purplefire_02" }
     };
 
-    // ДОБАВЛЕНО ПОЛЕ gold_reward (Награда золотом за сдачу ящика, в меди).
-    // Вы можете изменить эти значения, если в игре они отличаются!
+    // gold_reward указан в меди (1500 = 15 серебра, 3000 = 30 сер., 5000 = 50 сер.)
     const cratesData = [
-        { id: 248682, name: "Apprentice Herbs", name_ru: "Ящик ученика (Травы)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 250, rarity: "common", options: [ {name:"Peacebloom", qty:20}, {name:"Silverleaf", qty:20}, {name:"Earthroot", qty:10}, {name:"Mageroyal", qty:10}, {name:"Briarthorn", qty:10} ] },
-        { id: 248683, name: "Apprentice Ore", name_ru: "Ящик ученика (Руда)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 250, rarity: "common", options: [ {name:"Copper Ore", qty:20}, {name:"Tin Ore", qty:20} ] },
-        { id: 248684, name: "Apprentice Textiles", name_ru: "Ящик ученика (Ткань)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 250, rarity: "common", options: [ {name:"Linen Cloth", qty:40}, {name:"Light Leather", qty:20} ] },
-        { id: 248685, name: "Apprentice Curiosities", name_ru: "Ящик ученика (Диковинки)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 250, rarity: "common", options: [ {name:"Strange Dust", qty:20}, {name:"Greater Magic Essence", qty:4}, {name:"Small Glimmering Shard", qty:6}, {name:"Large Glimmering Shard", qty:2} ] },
-        { id: 248703, name: "Apprentice Ingots", name_ru: "Ящик ученика (Слитки)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 500, rarity: "uncommon", options: [ {name:"Copper Bar", qty:20}, {name:"Tin Bar", qty:20}, {name:"Bronze Bar", qty:10} ] },
-        { id: 248704, name: "Apprentice Parts", name_ru: "Ящик ученика (Детали)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 500, rarity: "uncommon", options: [ {name:"Handful of Copper Bolts", qty:16}, {name:"Copper Tube", qty:16}, {name:"Copper Modulator", qty:4} ] },
-        { id: 248702, name: "Apprentice Fabrics", name_ru: "Ящик ученика (Кожа/Ткань)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 500, rarity: "uncommon", options: [ {name:"Cured Light Hide", qty:2}, {name:"Bolt of Linen Cloth", qty:20} ] },
+        { id: 248682, name: "Apprentice Herbs", name_ru: "Ящик ученика (Травы)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Peacebloom", qty:20}, {name:"Silverleaf", qty:20}, {name:"Earthroot", qty:10}, {name:"Mageroyal", qty:10}, {name:"Briarthorn", qty:10} ] },
+        { id: 248683, name: "Apprentice Ore", name_ru: "Ящик ученика (Руда)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Copper Ore", qty:20}, {name:"Tin Ore", qty:20} ] },
+        { id: 248684, name: "Apprentice Textiles", name_ru: "Ящик ученика (Ткань)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Linen Cloth", qty:40}, {name:"Light Leather", qty:20} ] },
+        { id: 248685, name: "Apprentice Curiosities", name_ru: "Ящик ученика (Диковинки)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Strange Dust", qty:20}, {name:"Greater Magic Essence", qty:4}, {name:"Small Glimmering Shard", qty:6}, {name:"Large Glimmering Shard", qty:2} ] },
+        { id: 248703, name: "Apprentice Ingots", name_ru: "Ящик ученика (Слитки)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "uncommon", options: [ {name:"Copper Bar", qty:20}, {name:"Tin Bar", qty:20}, {name:"Bronze Bar", qty:10} ] },
+        { id: 248704, name: "Apprentice Parts", name_ru: "Ящик ученика (Детали)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "uncommon", options: [ {name:"Handful of Copper Bolts", qty:16}, {name:"Copper Tube", qty:16}, {name:"Copper Modulator", qty:4} ] },
+        { id: 248702, name: "Apprentice Fabrics", name_ru: "Ящик ученика (Кожа/Ткань)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "uncommon", options: [ {name:"Cured Light Hide", qty:2}, {name:"Bolt of Linen Cloth", qty:20} ] },
         
-        { id: 248686, name: "Journeyman Herbs", name_ru: "Ящик подмастерья (Травы)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1000, rarity: "common", options: [ {name:"Stranglekelp", qty:10}, {name:"Bruiseweed", qty:10}, {name:"Wild Steelbloom", qty:10}, {name:"Grave Moss", qty:10}, {name:"Kingsblood", qty:10} ] },
-        { id: 248687, name: "Journeyman Ore", name_ru: "Ящик подмастерья (Руда)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1000, rarity: "common", options: [ {name:"Silver Ore", qty:10}, {name:"Iron Ore", qty:20} ] },
-        { id: 248688, name: "Journeyman Textiles", name_ru: "Ящик подмастерья (Ткань)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1000, rarity: "common", options: [ {name:"Wool Cloth", qty:20}, {name:"Silk Cloth", qty:40}, {name:"Medium Leather", qty:20} ] },
-        { id: 248689, name: "Journeyman Curiosities", name_ru: "Ящик подмастерья (Диковинки)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1000, rarity: "common", options: [ {name:"Soul Dust", qty:20}, {name:"Greater Astral Essence", qty:4}, {name:"Small Glowing Shard", qty:6}, {name:"Large Glowing Shard", qty:2} ] },
-        { id: 248706, name: "Journeyman Ingots", name_ru: "Ящик подмастерья (Слитки)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 2000, rarity: "uncommon", options: [ {name:"Silver Bar", qty:10}, {name:"Iron Bar", qty:20} ] },
-        { id: 248705, name: "Journeyman Fabrics", name_ru: "Ящик подмастерья (Кожа/Ткань)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 2000, rarity: "uncommon", options: [ {name:"Bolt of Woolen Cloth", qty:6}, {name:"Bolt of Silk Cloth", qty:10}, {name:"Cured Medium Hide", qty:2} ] },
-        { id: 248707, name: "Journeyman Parts", name_ru: "Ящик подмастерья (Детали)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 2000, rarity: "uncommon", options: [ {name:"Bronze Tube", qty:8}, {name:"Whirring Bronze Gizmo", qty:7}, {name:"Bronze Framework", qty:4}, {name:"Gold Power Core", qty:45} ] },
+        { id: 248686, name: "Journeyman Herbs", name_ru: "Ящик подмастерья (Травы)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Stranglekelp", qty:10}, {name:"Bruiseweed", qty:10}, {name:"Wild Steelbloom", qty:10}, {name:"Grave Moss", qty:10}, {name:"Kingsblood", qty:10} ] },
+        { id: 248687, name: "Journeyman Ore", name_ru: "Ящик подмастерья (Руда)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Silver Ore", qty:10}, {name:"Iron Ore", qty:20} ] },
+        { id: 248688, name: "Journeyman Textiles", name_ru: "Ящик подмастерья (Ткань)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Wool Cloth", qty:20}, {name:"Silk Cloth", qty:40}, {name:"Medium Leather", qty:20} ] },
+        { id: 248689, name: "Journeyman Curiosities", name_ru: "Ящик подмастерья (Диковинки)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "common", options: [ {name:"Soul Dust", qty:20}, {name:"Greater Astral Essence", qty:4}, {name:"Small Glowing Shard", qty:6}, {name:"Large Glowing Shard", qty:2} ] },
+        { id: 248706, name: "Journeyman Ingots", name_ru: "Ящик подмастерья (Слитки)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "uncommon", options: [ {name:"Silver Bar", qty:10}, {name:"Iron Bar", qty:20} ] },
+        { id: 248705, name: "Journeyman Fabrics", name_ru: "Ящик подмастерья (Кожа/Ткань)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "uncommon", options: [ {name:"Bolt of Woolen Cloth", qty:6}, {name:"Bolt of Silk Cloth", qty:10}, {name:"Cured Medium Hide", qty:2} ] },
+        { id: 248707, name: "Journeyman Parts", name_ru: "Ящик подмастерья (Детали)", icon: "inv_crate_07", level: 10, favor: 5, gold_reward: 1500, rarity: "uncommon", options: [ {name:"Bronze Tube", qty:8}, {name:"Whirring Bronze Gizmo", qty:7}, {name:"Bronze Framework", qty:4}, {name:"Gold Power Core", qty:45} ] },
         
         { id: 248690, name: "Earthly Expert Herbs", name_ru: "Ящик умельца (Корни и стебли)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 3000, rarity: "common", options: [ {name:"Liferoot", qty:20}, {name:"Fadeleaf", qty:10}, {name:"Goldthorn", qty:10}, {name:"Khadgar's Whisker", qty:10} ] },
         { id: 248691, name: "Flowering Expert Herbs", name_ru: "Ящик умельца (Цветущие Травы)", icon: "inv_crate_07", level: 20, favor: 10, gold_reward: 3000, rarity: "common", options: [ {name:"Wintersbite", qty:10}, {name:"Firebloom", qty:10}, {name:"Purple Lotus", qty:20}, {name:"Arthas' Tears", qty:10} ] },
@@ -383,7 +379,7 @@
         const preparedData = [];
 
         for (const crate of filteredCrates) {
-            const cratePrice = getPrice(crate.id);
+            const cratePrice = getPrice(crate.id) || 0; // Если цены ящика нет, считаем 0
 
             const crateOptions = [];
             for (const opt of crate.options) {
@@ -391,13 +387,21 @@
                 const itemId = itemInfo ? itemInfo.id : null;
                 const price = itemId ? getPrice(itemId) : null;
 
-                const totalCost = price ? price * opt.qty : null;
-                const costPerFavor = totalCost ? totalCost / crate.favor : null;
-                
-                // Расчет с учетом награды за ящик
+                let totalCost = null;
+                let costPerFavor = null;
                 let netCostPerFavor = null;
-                if (totalCost !== null && crate.gold_reward !== undefined) {
-                    netCostPerFavor = (totalCost - crate.gold_reward) / crate.favor;
+
+                if (price !== null) {
+                    // ОБЩАЯ СТОИМОСТЬ = (Цена ресурса * Кол-во) + Цена ящика
+                    totalCost = (price * opt.qty) + cratePrice;
+                    
+                    // Цена за 1 Favor без учета золота за сдачу
+                    costPerFavor = totalCost / crate.favor;
+                    
+                    // Чистая цена за 1 Favor (с учетом золота за сдачу)
+                    if (crate.gold_reward !== undefined) {
+                        netCostPerFavor = (totalCost - crate.gold_reward) / crate.favor;
+                    }
                 }
 
                 crateOptions.push({
